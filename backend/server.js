@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import  authRoutes from './routes/auth.routes.js';
 import UserRoutes from './routes/user.routes.js';
+import postRoutes from './routes/post.routes.js';
 import dotenv from 'dotenv';
 import connectMongoDB from './db/connectMongoDB.js.js';
 import cookieParser from 'cookie-parser';
@@ -18,6 +19,7 @@ app.use(cookieParser());
 
 app.use("/api/auth", authRoutes);
 app.use("/api/user", UserRoutes);
+app.use("/api/posts", postRoutes);
 // console.log(process.env.PORT)
 
 
