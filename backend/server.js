@@ -1,0 +1,27 @@
+import express from 'express';
+import cors from 'cors';
+import  authRoutes from './routes/auth.routes.js';
+import UserRoutes from './routes/user.routes.js';
+import dotenv from 'dotenv';
+import connectMongoDB from './db/connectMongoDB.js.js';
+import cookieParser from 'cookie-parser';
+
+
+dotenv.config();
+const app = express();
+const PORT = process.env.PORT || 5000;
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+
+
+app.use("/api/auth", authRoutes);
+app.use("/api/user", UserRoutes);
+// console.log(process.env.PORT)
+
+
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+  connectMongoDB();
+});
