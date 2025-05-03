@@ -20,7 +20,7 @@ const SignUpPage = () => {
 
 	// useMutation to manipulate the data (create, update, delete)
 	// useQuery to fetch the data
-	const {mutate, isError, isPending, error} = useMutation({
+	const {mutate, isPending, isError,  error} = useMutation({
 		mutationFn: async({email, username, fullName, password }) => {
 			try {
 				const res = await fetch("/api/auth/signup" , {

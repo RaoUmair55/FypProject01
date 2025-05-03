@@ -14,7 +14,7 @@ const LoginPage = () => {
 		password: "",
 	});
 
-	const {mutate:loginMutation, isError, isPending, error} = useMutation({
+	const {mutate:loginMutation, isPending, isError,  error} = useMutation({
 		mutationFn: async ({email, password}) => {
 			try {
 				const res = await fetch("/api/auth/login",	{
