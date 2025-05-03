@@ -31,8 +31,8 @@ const SignUpPage = () => {
 					body: JSON.stringify({email, username, fullName, password})
 				});
 
-				// if (!res.ok) throw new Error("Something went wrong");
 				const data = await res.json();
+				if (!res.ok) throw new Error(data.error);
 				if (data.error) throw new Error(data.error);
 				console.log(data)
 				
