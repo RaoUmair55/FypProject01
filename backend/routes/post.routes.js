@@ -5,7 +5,7 @@ import { commentPost, createPost, deletePost, getAllPosts, getFollowedPosts, get
 const router = express.Router();
 
 router.get("/all", protectRoute, getAllPosts); // Assuming you have a function to get all posts
-router.get("/follow", protectRoute, getFollowedPosts); // Assuming you have a function to get all posts
+router.get("/following", protectRoute, getFollowedPosts); // Assuming you have a function to get all posts
 // router.get("/university/:university", protectRoute, getPostsByUniversity); // Assuming you have a function to get posts by university
 router.get("/getlikedPost/:id", protectRoute, likedPost); // Assuming you have a function to get posts by like
 router.get("/userPosts/:username", protectRoute, getUserPosts); // Assuming you have a function to get posts by like
