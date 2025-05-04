@@ -126,6 +126,10 @@ export const logout = async (req, res) => {
 export const getMe = async (req, res) => {
     try {
         const userId = req.user._id;
+        if (!userId) {
+            return res.status(401).json({ message: "Not authenticated" });
+        }
+        
         const user = await User.findById(userId).select("-password");
         if (!user) {
             return res.status(404).json({ error: "User not found" });

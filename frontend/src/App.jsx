@@ -1,6 +1,6 @@
 import React from 'react'
 import './index.css'
-import { Route, Routes } from 'react-router-dom'
+import { Navigate, Route, Routes } from 'react-router-dom'
 import HomePage from './Pages/home/HomePage'
 import LoginPage from './Pages/auth/login/LoginPage'
 import SignupPage from './Pages/auth/signup/SignUpPage'
@@ -10,23 +10,52 @@ import ProfilePage from './Pages/profile/ProfilePage'
 import Sidebar from './components/common/Sidebar'
 import RightPanel from './components/common/RightPanel'
 import { Toaster } from 'react-hot-toast'
+import { useQuery } from '@tanstack/react-query'
+import LoadingSpinner from './components/common/LoadingSpinner'
 
 function App() {
+  const {data:authUser, isLoading, isError, error} = useQuery({
+    queryKey: ['authUser'], // a unique name to this query, also used to refer to it later.
+    queryFn: async () => {
+      try {
+        const res = await fetch("api/auth/getMe");
+        const data = await res.json();
+        if (data.error) return null;
+        if (!res.ok) { 
+          throw new Error(data.error || "Something went wrong")
+        }
+        console.log("authUser:", data)
 
+        return data
+      } catch (error) {
+        throw new Error(error)
+      }
+    },
+    retry: false
+  });
+
+  if (isLoading) {
+    return (
+      <div className='h-screen flex justify-center items-center'>
+        <LoadingSpinner size='lg' />
+
+      </div>
+    )
+  }
 
   return (
     <div className='flex max-w-6xl mx-auto'>
       
       <Sidebar/>
       <Routes>
-        <Route path="/" element={<HomePage/>}/>
-        <Route path="/login" element={<LoginPage/>}/>
-        <Route path="/signup" element={<SignupPage/>}/>
-        <Route path="/notifications" element={<NotificationPage/>}/>
-        <Route path="/profile/:username" element={<ProfilePage/>}/>
+        <Route path="/" element={authUser? <HomePage/> : <Navigate to="/login" />} />
+        <Route path="/login" element={!authUser? <LoginPage/> : <Navigate to="/" />} />
+        <Route path="/signup" element={!authUser? <SignupPage/> : <Navigate to="/" /> } />
+        <Route path="/notifications" element={authUser? <NotificationPage/> : <Navigate to="/login" />} />
+        <Route path="/profile/:username" element={authUser? <ProfilePage/> : <Navigate to="/login" />} />
       </Routes>
       <RightPanel/>
-      <Toaster />
+      <Toaster /> 
     </div>
   )
 }
