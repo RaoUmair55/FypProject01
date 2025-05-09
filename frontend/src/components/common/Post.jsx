@@ -17,7 +17,7 @@ const Post = ({ post }) => {
 	const {data:authUser} = useQuery({queryKey: ["authUser"]}); 
 	const queryClient = useQueryClient();
 
-	const postOwner = post.user;
+		const postOwner = post.user;
 	const isLiked = post.likes.includes(authUser._id)
 
 	const isMyPost = authUser._id === post.user._id;
