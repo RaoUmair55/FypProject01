@@ -9,7 +9,11 @@ const postSchema = new mongoose.Schema(
     },
     text: {
       type: String,
-      required: true,
+      required: true, 
+    },
+    img:{
+      type: String,
+      required: false,
     },
     university: {
       type: String,

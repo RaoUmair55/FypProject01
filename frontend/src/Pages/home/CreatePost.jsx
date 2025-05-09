@@ -2,32 +2,42 @@ import { CiImageOn } from "react-icons/ci";
 import { BsEmojiSmileFill } from "react-icons/bs";
 import { useRef, useState } from "react";
 import { IoCloseSharp } from "react-icons/io5";
-import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
-import {toast} from "react-hot-toast";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-hot-toast";
 
 const CreatePost = () => {
 	const [text, setText] = useState("");
 	const [img, setImg] = useState(null);
 	const imgRef = useRef(null);
 
-	const {data:authUser} = useQuery({queryKey: ["authUser"]});
+	const { data: authUser } = useQuery({ queryKey: ["authUser"] });
 	const queryClient = useQueryClient();
 
-	const {mutate:createPost, isPending, isError, error} = useMutation({
-		mutationFn: async ({text, img}) => {
+	const { mutate: createPost, isPending, isError, error } = useMutation({
+		mutationFn: async ({ text, img }) => {
 			try {
+				const formData = new FormData();
+				// formData.append("text", text);`
+				formData.append("text", text);
+				if (img) {
+					formData.append("image", img);
+				}
 				const res = await fetch("/api/posts/create", {
 					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify({text, img}),
+					body: formData,
 				});
 
-				const data = res.json();
-				
-				if (!res.ok){
-					throw new Error(data.error || "Something went wrong");
+				let data;
+				try {
+					data = await res.json();
+				} catch (e) {
+					// const text = await res.text();
+					console.error("Non-JSON error:", text);
+					throw new Error("Server returned non-JSON response");
+				}
+
+				if (!res.ok) {
+					throw new Error(data.error || "Something went wrong in createPost");
 				}
 				return data;
 			} catch (error) {
@@ -38,7 +48,7 @@ const CreatePost = () => {
 			setText("");
 			setImg(null);
 			toast.success("Post created !");
-			queryClient.invalidateQueries({queryKey: ["posts"]});
+			queryClient.invalidateQueries({ queryKey: ["posts"] });
 		}
 	})
 
@@ -52,17 +62,13 @@ const CreatePost = () => {
 	const handleSubmit = (e) => {
 		e.preventDefault();
 		// alert("Post created successfully");
-		createPost({text, img});
+		createPost({ text, img });
 	};
 
 	const handleImgChange = (e) => {
 		const file = e.target.files[0];
 		if (file) {
-			const reader = new FileReader();
-			reader.onload = () => {
-				setImg(reader.result);
-			};
-			reader.readAsDataURL(file);
+			setImg(file)
 		}
 	};
 
@@ -89,7 +95,7 @@ const CreatePost = () => {
 								imgRef.current.value = null;
 							}}
 						/>
-						<img src={img} className='w-full mx-auto h-72 object-contain rounded' />
+						<img src={URL.createObjectURL(img)} className='w-full mx-auto h-72 object-contain rounded' />
 					</div>
 				)}
 
@@ -108,7 +114,7 @@ const CreatePost = () => {
 				</div>
 				{isError && <div className='text-red-500'>
 					{error.message}
-					</div>}
+				</div>}
 			</form>
 		</div>
 	);
