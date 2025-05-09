@@ -7,12 +7,12 @@ export const createPost = async (req, res) => {
     try {
         const {text} = req.body;
         if (!text) {
-            return res.status(400).json({ message: "Text is required" });
+            return res.status(400).json({ error: "Text is required" });
         }
         const userId = req.user._id; // Assuming you have the user ID in req.user
         const user = await User.findById(userId);
         if (!user) {
-            return res.status(404).json({ message: "User not found" });
+            return res.status(404).json({ error: "User not found" });
         }
         console.log(userId);
         const post = await Post.create({
@@ -29,7 +29,7 @@ export const createPost = async (req, res) => {
         
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: "Server error" });
+        res.status(500).json({ error: "Server error" });
         
     }
 }
@@ -41,17 +41,17 @@ export const deletePost = async (req, res) => {
 
         const post = await Post.findById(postId);
         if (!post) {
-            return res.status(404).json({ message: "Post not found" });
+            return res.status(404).json({ error: "Post not found" });
         }
 
         if (post.user.toString() !== userId.toString()) {
-            return res.status(403).json({ message: "You are not authorized to delete this post" });
+            return res.status(403).json({ error: "You are not authorized to delete this post" });
         }
         await Post.findByIdAndDelete(postId);
         return res.status(200).json({ message: "Post deleted successfully" });
     } catch (error) {
         console.error("Error in delete post controller",error);
-        res.status(500).json({ message: "Server error" });
+        res.status(500).json({ error: "Server error" });
     } 
 }
 
@@ -62,21 +62,21 @@ export const commentPost = async (req, res) => {
         const userId = req.user._id; // Assuming you have the user ID in req.user
 
         if (!text) {
-            return res.status(400).json({ message: "Comment text is required" });
+            return res.status(400).json({ error: "Comment text is required" });
         }
         const post = await Post.findById(postId);
         
         
         if (!post) {
-            return res.status(404).json({ message: "Post not found" });
+            return res.status(404).json({ error: "Post not found" });
         }
         //check if post university and user university are same
         const user = await User.findById(userId);
         if (!user) {
-            return res.status(404).json({ message: "User not found" });
+            return res.status(404).json({ error: "User not found" });
         }
         if (post.university !== user.university) {
-            return res.status(403).json({ message: "You are not authorized to comment on this post" });
+            return res.status(403).json({ error: "You are not authorized to comment on this post" });
         }
 
         const comment = {
@@ -90,7 +90,7 @@ export const commentPost = async (req, res) => {
         return res.status(200).json({ message: "Comment added successfully", comment });
     } catch (error) {
         console.error("Error in comment post controller",error);
-        res.status(500).json({ message: "Server error" });
+        res.status(500).json({ error: "Server error" });
     } 
 }
 
@@ -102,15 +102,15 @@ export const likeUnLike = async (req, res) => {
 
         const post = await Post.findById(postId);
         if (!post) {
-            return res.status(404).json({ message: "Post not found" });
+            return res.status(404).json({ error: "Post not found" });
         }
 //check if the university of post and user are same
         const user = await User.findById(userId);
         if (!user) {
-            return res.status(404).json({ message: "User not found" });
+            return res.status(404).json({ error: "User not found" });
         }
         if (post.university !== user.university) {
-            return res.status(403).json({ message: "You are not authorized to like/unlike this post" });
+            return res.status(403).json({ error: "You are not authorized to like/unlike this post" });
         }
 
         const index = post.likes.indexOf(userId);
@@ -120,6 +120,7 @@ export const likeUnLike = async (req, res) => {
             // Add the post ID to the user's likedPosts array
             await user.updateOne({ $addToSet: { likedPosts: postId } });
             await post.save();
+            const updatedLikes = post.likes
             // Create a notification for the user who posted the post
             const notification = await Notification.create({
                 from: userId,
@@ -127,18 +128,19 @@ export const likeUnLike = async (req, res) => {
                 type: "like",
             });
             await notification.save();
-            return res.status(200).json({ message: "Post liked successfully" });
+            return res.status(200).json(updatedLikes);
         } else {
             // Remove the post ID from the user's likedPosts array
             await user.updateOne({ $pull: { likedPosts: postId } });
             post.likes.splice(index, 1);
+            const updatedLikes = post.likes
             await post.save();
 
-            return res.status(200).json({ message: "Post unliked successfully" });
+            return res.status(200).json(updatedLikes);
         }
     } catch (error) {
         console.error("Error in like/unlike post controller",error);
-        res.status(500).json({ message: "Server error" });
+        res.status(500).json({ error: "Server error" });
         
     }
 }
@@ -159,7 +161,7 @@ export const getAllPosts = async (req, res) => {
         return res.status(200).json(posts);
     } catch (error) {
         console.error("Error in get all posts controller",error);
-        res.status(500).json({ message: "Server error" });
+        res.status(500).json({ error: "Server error" });
     } 
 }
 
@@ -169,7 +171,7 @@ export const likedPost = async (req, res) => {
     try {
         const user = await User.findById(userId)
         if (!user) {
-            return res.status(404).json({ message: "User not found" });
+            return res.status(404).json({ error: "User not found" });
         }
         const likedPosts = await Post.find({ _id: { $in: user.likedPosts } })
             .populate({
@@ -179,7 +181,7 @@ export const likedPost = async (req, res) => {
         return res.status(200).json(likedPosts);
     } catch (error) {
         console.error("Error in get liked posts controller", error);
-        res.status(500).json({ message: "Server error" });
+        res.status(500).json({ error: "Server error" });
     } 
 }
 
@@ -189,7 +191,7 @@ export const getFollowedPosts = async (req, res) => {
         const user = await User.findById(userId)
 
         if (!user) {
-            return res.status(404).json({ message: "User not found" });
+            return res.status(404).json({ error: "User not found" });
         }
 
        const following = user.following; // Array of user IDs that the current user is following
@@ -207,7 +209,7 @@ export const getFollowedPosts = async (req, res) => {
        return res.status(200).json(feedPosts);
     } catch (error) {
         console.error("Error in get followed posts controller",error);
-        res.status(500).json({ message: "Server error" });
+        res.status(500).json({ error: "Server error" });
     }
 }
    
@@ -216,13 +218,13 @@ export const getUserPosts = async (req, res) => {
         const { username } = req.params; // Assuming the username is passed as a URL parameter
         const user = await User.findOne({ username });
         if (!user) {
-            return res.status(404).json({ message: "User not found" });
+            return res.status(404).json({ error: "User not found" });
         }
         const posts = await Post.find({ user: user._id }).populate("user", "username fullName university").sort({ createdAt: -1 });
         return res.status(200).json(posts);
     } catch (error) {
         console.error("Error in get user posts controller",error);
-        res.status(500).json({ message: "Server error" });
+        res.status(500).json({ error: "Server error" });
     } 
 }
 
