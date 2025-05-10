@@ -5,7 +5,7 @@ import {useQuery} from "@tanstack/react-query"
 import { useEffect } from "react";
 
 	// feed category (the prop)
-const Posts = ({feedType}) => {
+const Posts = ({feedType, username, userId}) => {
 	// const isLoading = false;
 
 	const getPostEndPoint = () => {
@@ -14,9 +14,13 @@ const Posts = ({feedType}) => {
 				return "/api/posts/all";
 			case "following": 
 				return "/api/posts/following";
+			case "posts":
+				return `/api/posts/userPosts/${username}`;
+			case "likes":
+				return `/api/posts/getlikedPost/${userId}`;
 
 			default:
-				return "/api/posts/all"
+				return "/api/posts/all";
 		}
 	}
 
@@ -41,7 +45,7 @@ const Posts = ({feedType}) => {
 	});
 	useEffect(() => { 
 		refetch();
-	}, [feedType, refetch])
+	}, [feedType, refetch, username])
 
 	return (
 		<>
