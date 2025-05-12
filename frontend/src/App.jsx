@@ -12,6 +12,7 @@ import RightPanel from './components/common/RightPanel'
 import { Toaster } from 'react-hot-toast'
 import { useQuery } from '@tanstack/react-query'
 import LoadingSpinner from './components/common/LoadingSpinner'
+import { useEffect } from 'react'
 
 function App() {
   const {data:authUser, isLoading, isError, error} = useQuery({
@@ -33,6 +34,9 @@ function App() {
     },
     retry: false
   });
+
+
+
 
   if (isLoading) {
     return (

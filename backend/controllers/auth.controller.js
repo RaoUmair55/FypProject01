@@ -6,11 +6,7 @@ import { generateTokenAndSetCookie } from "../utills/generateTokenAndSetCookie.j
 export const signup = async (req, res) => {
     try {
         const { username, fullName, email, password,bio } = req.body;
-        // Validate input fields
-         // Check if all required fields are provided
-         // Check if email is in valid format
-         // Check if password is at least 6 characters long
-         // Check if email belongs to a recognized university domain
+
         if (!username || !fullName || !email || !password) {
             return res.status(400).json({ error: "All fields are required" });
         }

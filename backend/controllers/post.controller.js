@@ -1,11 +1,25 @@
 import User from "../models/user.model.js";
 import Notification from "../models/notification.model.js";
 import Post from "../models/post.model.js";
+import { uploadOnCloudinary } from "../utills/uploadCloudinary.js";
 
 
 export const createPost = async (req, res) => {
     try {
-        const {text} = req.body;
+          console.log('Received text:', req.body.text);
+        console.log('Received file:', req.file); // Check the file uploaded (if any)
+
+        const text = req.body.text;
+        const localFilePath = req.file?.path;
+
+         let imageUrl = '';
+        if (localFilePath) {
+         const cloudinaryResult = await uploadOnCloudinary(localFilePath);
+         imageUrl = cloudinaryResult?.secure_url;
+         console.log('Cloudinary result:', cloudinaryResult);
+         // Remove the local file after uploading to Cloudinary
+        //  fs.unlinkSync(localFilePath);
+        }
         if (!text) {
             return res.status(400).json({ error: "Text is required" });
         }
@@ -18,6 +32,7 @@ export const createPost = async (req, res) => {
         const post = await Post.create({
             user: userId,
             text,
+            img: imageUrl,
             university: user.university,
         });
 
@@ -26,7 +41,6 @@ export const createPost = async (req, res) => {
         // await notification.save();
         return res.status(201).json({ message: "Post created successfully", post });
 
-        
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: "Server error" });
