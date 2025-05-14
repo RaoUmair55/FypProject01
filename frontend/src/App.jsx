@@ -15,6 +15,7 @@ import LoadingSpinner from './components/common/LoadingSpinner'
 import { useEffect } from 'react'
 
 function App() {
+  
   const {data:authUser, isLoading, isError, error} = useQuery({
     queryKey: ['authUser'], // a unique name to this query, also used to refer to it later.
     queryFn: async () => {
@@ -35,9 +36,6 @@ function App() {
     retry: false
   });
 
-
-
-
   if (isLoading) {
     return (
       <div className='h-screen flex justify-center items-center'>
@@ -48,7 +46,8 @@ function App() {
   }
 
   return (
-    <div className=' flex max-w-7xl mx-auto gap-5 mt-3'>
+    <div className=' flex max-w-7xl mx-auto gap-10 pt-3'>
+      
       
       {authUser && <Sidebar/>}
       <Routes>
@@ -64,4 +63,4 @@ function App() {
   )
 }
 
-export default App
+export default App;
