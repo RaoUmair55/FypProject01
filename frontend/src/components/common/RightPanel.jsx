@@ -34,7 +34,7 @@ const RightPanel = () => {
 	return (
 		<div className='hidden lg:block my-4 mx-2'>
 			<div className='bg-[#153a542c] border-2 border-gray-700 p-4 rounded-md sticky top-2'>
-				<p className='font-bold'>Who to follow</p>
+				<p className='font-bold text-[#0f1419]'>Who to follow</p>
 				<div className='flex flex-col gap-4'>
 					{/* item */}
 					{isLoading && (
@@ -49,7 +49,7 @@ const RightPanel = () => {
 						suggestedUsers?.map((user) => (
 							<Link
 								to={`/profile/${user.username}`}
-								className='flex items-center justify-between gap-4'
+								className='flex items-center text-[#0f1419] justify-between gap-4'
 								key={user._id}
 							>
 								<div className='flex gap-2 items-center'>
@@ -67,7 +67,7 @@ const RightPanel = () => {
 								</div>
 								<div>
 									<button
-										className='btn bg-white text-black hover:bg-white hover:opacity-90 rounded-full btn-sm'
+										className='btn bg-[#1d9bf0] text-white hover:bg-[#1a8cd8]  rounded-full btn-sm'
 										onClick={(e) => {
 											e.preventDefault();
 											follow(user._id);
