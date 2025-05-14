@@ -134,18 +134,18 @@ const Post = ({ post }) => {
 
 	return (
 		<>
-			<div className='flex gap-2 items-start p-4 border-b border-gray-700'>
+			<div className='flex gap-2 items-start p-4 border-2 shadow-lg shadow-[#153a5461] my-4 rounded-2xl border-gray-700'>
 				<div className='avatar'>
-					<Link to={`/profile/${postOwner.username}`} className='w-8 rounded-full overflow-hidden'>
+					<Link to={`/profile/${postOwner.username}`} className='w-8 rounded-full overflow-hidden '>
 						<img src={postOwner.profileImg || "/avatar-placeholder.png"} />
 					</Link>
 				</div>
-				<div className='flex flex-col flex-1'>
-					<div className='flex gap-2 items-center'>
+				<div className='flex flex-col flex-1 '>
+					<div className='flex gap-2 items-center text-[#153a54]'>
 						<Link to={`/profile/${postOwner.username}`} className='font-bold'>
 							{postOwner.fullName}
 						</Link>
-						<span className='text-gray-700 flex gap-1 text-sm'>
+						<span className='text-gray-700 flex gap-1 text-sm '>
 							<Link to={`/profile/${postOwner.username}`}>@{postOwner.username}</Link>
 							<span>·</span>
 							<span>{formattedDate}</span>
@@ -160,12 +160,12 @@ const Post = ({ post }) => {
 							</span>
 						)}
 					</div>
-					<div className='flex flex-col gap-3 overflow-hidden'>
+					<div className='flex flex-col gap-3 overflow-hidden text-[#153a54]'>
 						<span>{post.text}</span>
 						{post.img && (
 							<img
 								src={post.img}
-								className='h-80 object-contain rounded-lg border border-gray-700'
+								className='h-80 object-contain rounded-lg border border-gray-700 '
 								alt=''
 							/>
 						)}

@@ -48,7 +48,7 @@ function App() {
   }
 
   return (
-    <div className='flex max-w-6xl mx-auto'>
+    <div className=' flex max-w-7xl mx-auto gap-5 mt-3'>
       
       {authUser && <Sidebar/>}
       <Routes>

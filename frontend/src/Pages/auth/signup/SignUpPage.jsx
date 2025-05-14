@@ -60,84 +60,87 @@ const SignUpPage = () => {
 
 
 	return (
-    <div className="max-w-screen-xl mx-auto my-20 flex items-center justify-center gap-40 px-8 bg-black py-10 rounded-lg shadow-neutral-500">
-      <div className="flex-1 hidden lg:flex items-center justify-center">
-        <XSvg className="lg:w-50 fill-white" />
-      </div>
-      <div className="flex-1 flex flex-col justify-center items-center "> 
-        <form className="w-2xs max-w-10xl mx-auto flex flex-col gap-4 " onSubmit={handleSubmit}>
-
-					<XSvg className="w-24 lg:hidden fill-white mx-auto" />
-					<h1 className="text-4xl font-extrabold text-white text-center">Join today.</h1>
-
-					{/* Email */}
-					<label className="input input-bordered rounded flex items-center gap-2">
-						<MdOutlineMail />
-						<input
-							type="email"
-							className="grow"
-							placeholder="Email"
-							name="email"
-							onChange={handleInputChange}
-							value={formData.email}
-						/>
-					</label>
-
-					{/* Username and Full Name */}
-					
-						<label className="input input-bordered rounded flex items-center gap-2">
-							<FaUser />
-							<input
-								type="text"
-								className="grow"
-								placeholder="Username"
-								name="username"
-								onChange={handleInputChange}
-								value={formData.username}
-							/>
-						</label>
-						<label className="input input-bordered rounded flex items-center gap-2">
-							<MdDriveFileRenameOutline />
-							<input
-								type="text"
-								className="grow"
-								placeholder="Full Name"
-								name="fullName"
-								onChange={handleInputChange}
-								value={formData.fullName}
-							/>
-						</label>
+		<>
+			<div className="absolute w-[300px] h-[300px] bg-[#153a5497] rounded-full blur-[120px] top-10 left-60 z-0"></div>
+			<div className="absolute w-[300px] h-[300px] bg-[#153a5497] rounded-full blur-[120px] top-70 right-60 z-0"></div>
 			
+			<div className="card lg:card-side bg-[#f8f9fd] shadow-sm mx-auto my-20 flex items-center justify-center gap-10 px-16 py-10 rounded-lg shadow-[#153a54]">
+				<div className="flex-1 hidden lg:flex items-center justify-center ">
+					<XSvg className="lg:w-80 fill-white " />
+				</div>
+				<div className="flex-1 flex flex-col justify-center items-center"> 
+					<form className="w-2xs max-w-10xl mx-auto flex flex-col gap-4 " onSubmit={handleSubmit}>
+						<XSvg className="w-24 lg:hidden fill-white mx-auto" />
+						<h1 className="text-4xl font-extrabold text-[#153a54] text-center">Join today.</h1>
+						{/* Email */}
+						<label className="input input-bordered rounded flex items-center gap-2 bg-[#153a54]">
+							<MdOutlineMail className="text-[#f8f9fd]"/>
+							<input
+								type="email"
+								className="grow"
+								placeholder="student@gmail.com"
+								name="email"
+								onChange={handleInputChange}
+								value={formData.email}
+							/>
+						</label>
 
-					{/* Password */}
-					<label className="input input-bordered rounded flex items-center gap-2">
-						<MdPassword />
-						<input
-							type="password"
-							className="grow"
-							placeholder="Password"
-							name="password"
-							onChange={handleInputChange}
-							value={formData.password}
-						/>
-					</label>
+						{/* Username and Full Name */}
+						
+							<label className="input input-bordered rounded flex items-center gap-2 bg-[#153a54]">
+								<FaUser className="text-[#f8f9fd]"/>
+								<input
+									type="text"
+									className="grow"
+									placeholder="Username"
+									name="username"
+									onChange={handleInputChange}
+									value={formData.username}
+								/>
+							</label>
+							<label className="input input-bordered rounded flex items-center gap-2 bg-[#153a54]">
+								<MdDriveFileRenameOutline className="text-[#f8f9fd]"/>
+								<input
+									type="text"
+									className="grow"
+									placeholder="Full Name"
+									name="fullName"
+									onChange={handleInputChange}
+									value={formData.fullName}
+								/>
+							</label>
+				
 
-					{/* Sign Up Button */}
-					<button className="btn rounded-full btn-primary text-white">
-						{isPending? "Loading..." : "Sign Up"}
-					</button>
-					{isError && <p className="text-red-500 text-center">{error.message}</p>}
-				</form>
+						{/* Password */}
+						<label className="input input-bordered rounded flex items-center gap-2 bg-[#153a54]">
+							<MdPassword className="text-[#f8f9fd]"/>
+							<input
+								type="password"
+								className="grow"
+								placeholder="Password"
+								name="password"
+								onChange={handleInputChange}
+								value={formData.password}
+							/>
+						</label>
 
-				{/* Already have account */}
-				<div className="w-full max-w-sm md:max-w-md lg:w-2/3 flex flex-col gap-2 mt-4 items-center">
-					<p className="text-white text-lg text-center">Already have an account?</p>
-					<Link to="/login" className="w-full">
-						<button className="btn rounded-full btn-primary text-white btn-outline w-full">Sign in</button>
-					</Link>
+						{/* Sign Up Button */}
+						<button className="btn rounded-full bg-[#dff2fe] text-[#153a54]">
+							{isPending? "Loading..." : "Sign Up"}
+						</button>
+						{isError && <p className="text-red-500 text-center">{error.message}</p>}
+					</form>
+
+					{/* Already have account */}
+					<div className="w-full max-w-sm md:max-w-md lg:w-2/3 flex flex-col gap-2 mt-4 items-center">
+						<p className="text-[#153a54] text-lg text-center">Already have an account?</p>
+						<Link to="/login" className="w-full">
+							<button className="btn bg-[#dff2fe] text-[#153a54] rounded-full w-full">Sign in</button>
+						</Link>
+					</div>
 				</div>
 			</div>
-		</div>
+		</>
 	);
 };
 export default SignUpPage;

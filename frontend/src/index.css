@@ -1,2 +1,34 @@
 @import "tailwindcss";
 @plugin "daisyui";
+@tailwind utilities;
+
+
+.card{
+  @apply hover:shadow-[#153a54] shadow-lg;
+   @apply hover:scale-105;
+  @apply transition-all;
+  @apply duration-300;
+  @apply ease-in-out;
+  @apply hover:shadow-lg;
+  @apply hover:shadow-[#153a54];
+  @apply hover:shadow-2xl;
+  @apply hover:shadow-[#153a54];
+}
+
+body{
+  background-color: #dff2fe;
+}
+
+input::placeholder{
+  color: #f8f9fd;
+}
+
+textarea::placeholder {
+  color: #f8f9fd;
+}
+
+textarea{
+  color: #f8f9fd;
+  font-size: .9rem;
+}
+

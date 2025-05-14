@@ -45,25 +45,25 @@ const Sidebar = () => {
   const {data} = useQuery({queryKey: ["authUser"]});
 
 	return (
-		<div className='md:flex-[2_2_0] w-18 max-w-52'>
-			<div className='sticky top-0 left-0 h-screen flex flex-col border-r border-gray-700 w-20 md:w-full'>
-				<Link to='/' className='flex justify-center md:justify-start'>
-					<XSvg className='px-2 w-12 h-12 rounded-full fill-white hover:bg-stone-900' />
+		<div className='md:flex-[2_2_0] w-18 max-w-72 md:w-full md:block'>
+			<div className='sticky top-0 left-0 h-1/4 flex flex-col border-2 border-gray-400 w-20 md:w-full rounded-2xl bg-[#153a542c] p-4'>
+				<Link to='/' className='flex justify-center items-center md:justify-start'>
+					<XSvg className='px-2 w-32 h-32 rounded-full fill-white' />
 				</Link>
 				<ul className='flex flex-col gap-3 mt-4'>
 					<li className='flex justify-center md:justify-start'>
 						<Link
 							to='/'
-							className='flex gap-3 items-center hover:bg-stone-900 transition-all rounded-full duration-300 py-2 pl-2 pr-4 max-w-fit cursor-pointer'
+							className='flex gap-3 items-center bg-[#dff2fe] text-[#153a54] font-medium transition-all rounded-2xl duration-300 py-2 pl-2 pr-4 max-w-fit cursor-pointer'
 						>
 							<MdHomeFilled className='w-8 h-8' />
-							<span className='text-lg hidden md:block'>Home</span>
+							<span className=' text-lg hidden md:block'>Home</span>
 						</Link>
 					</li>
 					<li className='flex justify-center md:justify-start'>
 						<Link
 							to='/notifications'
-							className='flex gap-3 items-center hover:bg-stone-900 transition-all rounded-full duration-300 py-2 pl-2 pr-4 max-w-fit cursor-pointer'
+							className='flex gap-3 items-center hover:bg-[#dff2fe] text-[#153a54] transition-all rounded-full duration-300 py-2 pl-2 pr-4 max-w-fit cursor-pointer'
 						>
 							<IoNotifications className='w-6 h-6' />
 							<span className='text-lg hidden md:block'>Notifications</span>
@@ -73,7 +73,7 @@ const Sidebar = () => {
 					<li className='flex justify-center md:justify-start'>
 						<Link
 							to={`/profile/${data?.username}`}
-							className='flex gap-3 items-center hover:bg-stone-900 transition-all rounded-full duration-300 py-2 pl-2 pr-4 max-w-fit cursor-pointer'
+							className='flex gap-3 items-center hover:bg-[#dff2fe] text-[#153a54] transition-all rounded-full duration-300 py-2 pl-2 pr-4 max-w-fit cursor-pointer'
 						>
 							<FaUser className='w-6 h-6' />
 							<span className='text-lg hidden md:block'>Profile</span>
@@ -83,16 +83,16 @@ const Sidebar = () => {
 				{data && (
 					<Link
 						to={`/profile/${data.username}`}
-						className='mt-auto mb-10 flex gap-2 items-start transition-all duration-300 hover:bg-[#181818] py-2 px-4 rounded-full'
+						className='mt-auto mb-10 flex gap-2 items-start transition-all duration-300 bg-[#dff2fe] rounded-2xl py-2 px-4 '
 					>
 						<div className='avatar hidden md:inline-flex'>
 							<div className='w-8 rounded-full'>
 								<img src={data?.profileImg || "/avatar-placeholder.png"} />
 							</div>
 						</div>
-						<div className='flex justify-between flex-1'>
+						<div className='flex justify-between flex-1 text-[#153a54]'>
 							<div className='hidden md:block'>
-								<p className='text-white font-bold text-sm w-20 truncate'>{data?.fullName}</p>
+								<p className='text-[#153a54] font-bold text-sm w-20 truncate '>{data?.fullName}</p>
 								<p className='text-slate-500 text-sm'>@{data?.username}</p>
 							</div>
 							<BiLogOut className='w-5 h-5 cursor-pointer' 

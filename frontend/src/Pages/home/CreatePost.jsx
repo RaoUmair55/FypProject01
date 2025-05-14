@@ -73,7 +73,7 @@ const CreatePost = () => {
 	};
 
 	return (
-		<div className='flex p-4 items-start gap-4 border-b border-gray-700'>
+		<div className='flex p-4 items-start gap-4 border-2 rounded-2xl my-4 border-gray-7	00 bg-[#153a542c]'>
 			<div className='avatar'>
 				<div className='w-8 rounded-full'>
 					<img src={data.profileImg || "/avatar-placeholder.png"} />
@@ -81,7 +81,7 @@ const CreatePost = () => {
 			</div>
 			<form className='flex flex-col gap-2 w-full' onSubmit={handleSubmit}>
 				<textarea
-					className='textarea w-full p-0 text-lg resize-none border-none focus:outline-none  border-gray-800'
+					className='textarea bg-[#153a54] rounded-2xl w-full p-3 text-lg resize-none focus:outline-none border-gray-400'
 					placeholder='What is happening?!'
 					value={text}
 					onChange={(e) => setText(e.target.value)}
@@ -102,13 +102,13 @@ const CreatePost = () => {
 				<div className='flex justify-between border-t py-2 border-t-gray-700'>
 					<div className='flex gap-1 items-center'>
 						<CiImageOn
-							className='fill-primary w-6 h-6 cursor-pointer'
+							className='fill-[#153a54] w-6 h-6 cursor-pointer'
 							onClick={() => imgRef.current.click()}
 						/>
-						<BsEmojiSmileFill className='fill-primary w-5 h-5 cursor-pointer' />
+						<BsEmojiSmileFill className='fill-[#153a54] w-5 h-5 cursor-pointer' />
 					</div>
 					<input type='file' accept="image/*" hidden ref={imgRef} onChange={handleImgChange} />
-					<button className='btn btn-primary rounded-full btn-sm text-white px-4'>
+					<button className='btn btn-[#153a54] rounded-full btn-sm text-white px-4'>
 						{isPending ? "Posting..." : "Post"}
 					</button>
 				</div>

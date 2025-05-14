@@ -8,12 +8,12 @@ const HomePage = () => {
 
 	return (
 		<>
-			<div className='flex-[4_4_0] mr-auto border-r border-gray-700 min-h-screen'>
+			<div className='flex-[4_4_0] mr-auto min-h-screen  '>
 				{/* Header */}
-				<div className='flex w-full border-b border-gray-700'>
+				<div className='flex w-full border-2 border-gray-700 bg-[#153a542c]  rounded-2xl'>
 					<div
 						className={
-							"flex justify-center flex-1 p-3 hover:bg-secondary transition duration-300 cursor-pointer relative"
+							"flex justify-center flex-1 p-3 hover:bg-ghost transition duration-300 cursor-pointer relative"
 						}
 						onClick={() => setFeedType("forYou")}
 					>
@@ -23,7 +23,7 @@ const HomePage = () => {
 						)}
 					</div>
 					<div
-						className='flex justify-center flex-1 p-3 hover:bg-secondary transition duration-300 cursor-pointer relative'
+						className='flex justify-center flex-1 p-3 hover:bg-ghost transition duration-300 cursor-pointer relative'
 						onClick={() => setFeedType("following")}
 					>
 						Following
