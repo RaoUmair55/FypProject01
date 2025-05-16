@@ -13,6 +13,7 @@ import { Toaster } from 'react-hot-toast'
 import { useQuery } from '@tanstack/react-query'
 import LoadingSpinner from './components/common/LoadingSpinner'
 import { useEffect } from 'react'
+import VerifyOTPPage from './Pages/auth/signup/VerifyEmail'
 
 function App() {
   
@@ -54,6 +55,7 @@ function App() {
         <Route path="/" element={authUser? <HomePage/> : <Navigate to="/login" />} />
         <Route path="/login" element={!authUser? <LoginPage/> : <Navigate to="/" />} />
         <Route path="/signup" element={!authUser? <SignupPage/> : <Navigate to="/" /> } />
+        <Route path="/verify" element={!authUser? <VerifyOTPPage/> : <Navigate to="/" /> } />
         <Route path="/notifications" element={authUser? <NotificationPage/> : <Navigate to="/login" />} />
         <Route path="/profile/:username" element={authUser? <ProfilePage/> : <Navigate to="/login" />} />
       </Routes>

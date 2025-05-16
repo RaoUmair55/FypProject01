@@ -2,26 +2,30 @@ import  {getUniversityFromEmail}  from "../utills/universityUtills.js";
 import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import { generateTokenAndSetCookie } from "../utills/generateTokenAndSetCookie.js";
+import  sendOTP  from "../utills/mailer.js";
 
 export const signup = async (req, res) => {
     try {
-        const { username, fullName, email, password,bio } = req.body;
+        const { username, fullName, email, password, bio } = req.body;
 
         if (!username || !fullName || !email || !password) {
             return res.status(400).json({ error: "All fields are required" });
         }
+
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
             return res.status(400).json({ error: "Invalid email format" });
         }
+
         if (password.length < 6) {
             return res.status(400).json({ error: "Password must be at least 6 characters long" });
         }
+
         const university = getUniversityFromEmail(email);
         if (!university) {
             return res.status(400).json({ error: "Email does not belong to a recognized university" });
         }
-      
+
         const existedUser = await User.findOne({ $or: [{ username }, { email }] });
         if (existedUser) {
             return res.status(400).json({ error: "User already exists" });
@@ -29,6 +33,11 @@ export const signup = async (req, res) => {
 
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
+
+        // 🔐 Generate OTP
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 mins
+
         const newUser = new User({
             username,
             fullName,
@@ -36,33 +45,48 @@ export const signup = async (req, res) => {
             password: hashedPassword,
             university,
             bio,
+            isVerified: false,
+            otp,
+            otpExpiresAt,
         });
 
-        if (newUser) {
-            generateTokenAndSetCookie(newUser._id, res);
-            await newUser.save();
-            return res.status(201).json({ 
-                _id: newUser._id,
-                username: newUser.username,
-                fullName: newUser.fullName,
-                email: newUser.email,
-                university: newUser.university,
-                bio: newUser.bio,
-                createdAt: newUser.createdAt,
-                updatedAt: newUser.updatedAt,
-                followers: newUser.followers,
-                following: newUser.following,
-             });
-        } else {
-            res.status(400).json({ error: "User not created" });
-        }
+        await newUser.save();
+        await sendOTP(email, otp); // 📧 Send OTP to email
 
-
+        res.status(201).json({ message: "User created. OTP sent to email for verification." });
     } catch (error) {
         console.error("Error in signup:", error);
         res.status(500).json({ error: "Internal server error" });
-    }  
+    }
 };
+
+// POST /api/auth/verify
+export const verifyOTP = async (req, res) => {
+  const { email, otp } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+
+    if (!user) return res.status(400).json({ error: "User not found" });
+    if (user.isVerified) return res.status(400).json({ error: "User already verified" });
+
+    if (user.otp !== otp || user.otpExpiresAt < new Date()) {
+      return res.status(400).json({ error: "Invalid or expired OTP" });
+    }
+
+    user.isVerified = true;
+    user.otp = null;
+    user.otpExpiresAt = null;
+    await user.save();
+
+    res.status(200).json({ message: "Email verified successfully. You can now log in." });
+  } catch (error) {
+    console.error("Error verifying OTP:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+// POST /api/auth/send-otp
+
 
 export const login = async (req, res) => {
     try {

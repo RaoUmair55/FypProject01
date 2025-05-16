@@ -58,15 +58,14 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: false,
     },
-    verificationToken: {
+    otp: {
         type: String,
-        default: null,
+        default: "",
     },
-    verificationTokenExpiry: {
+    otpExpiresAt: {
         type: Date,
-        default: null,
     },
-    
+
 }, {
     timestamps: true,
 });
