@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 
 import XSvg from "../../../components/svg/X";
@@ -11,6 +11,7 @@ import { useMutation } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
 const SignUpPage = () => {
+	const navigate = useNavigate();
 	const [formData, setFormData] = useState({
 		email: "",
 		username: "",
@@ -20,15 +21,15 @@ const SignUpPage = () => {
 
 	// useMutation to manipulate the data (create, update, delete)
 	// useQuery to fetch the data
-	const {mutate, isPending, isError,  error} = useMutation({
-		mutationFn: async({email, username, fullName, password }) => {
+	const { mutate, isPending, isError, error } = useMutation({
+		mutationFn: async ({ email, username, fullName, password }) => {
 			try {
-				const res = await fetch("/api/auth/signup" , {
+				const res = await fetch("/api/auth/signup", {
 					method: "POST",
 					headers: {
 						"Content-Type": "application/json"
 					},
-					body: JSON.stringify({email, username, fullName, password})
+					body: JSON.stringify({ email, username, fullName, password })
 				});
 
 				const data = await res.json();
@@ -43,9 +44,10 @@ const SignUpPage = () => {
 				throw error
 			}
 		},
-		onSuccess: () => {
-			toast.success("Account created !")
-		}
+		onSuccess: (data) => {
+					toast.success("Account created! Check email for OTP.");
+					navigate("/verify", { state: { email: formData.email } }); // Navigate to OTP page
+				}
 	})
 
 	const handleSubmit = (e) => {
@@ -63,18 +65,18 @@ const SignUpPage = () => {
 		<>
 			<div className="absolute w-[300px] h-[300px] bg-[#153a5497] rounded-full blur-[120px] top-10 left-60 z-0"></div>
 			<div className="absolute w-[300px] h-[300px] bg-[#153a5497] rounded-full blur-[120px] top-70 right-60 z-0"></div>
-			
+
 			<div className="card lg:card-side bg-[#f8f9fd] shadow-sm mx-auto my-20 flex items-center justify-center gap-10 px-16 py-10 rounded-lg shadow-[#153a54]">
 				<div className="flex-1 hidden lg:flex items-center justify-center ">
 					<XSvg className="lg:w-80 fill-white " />
 				</div>
-				<div className="flex-1 flex flex-col justify-center items-center"> 
+				<div className="flex-1 flex flex-col justify-center items-center">
 					<form className="w-2xs max-w-10xl mx-auto flex flex-col gap-4 " onSubmit={handleSubmit}>
 						<XSvg className="w-24 lg:hidden fill-white mx-auto" />
 						<h1 className="text-4xl font-extrabold text-[#153a54] text-center">Join today.</h1>
 						{/* Email */}
 						<label className="input input-bordered rounded flex items-center gap-2 bg-[#153a54]">
-							<MdOutlineMail className="text-[#f8f9fd]"/>
+							<MdOutlineMail className="text-[#f8f9fd]" />
 							<input
 								type="email"
 								className="grow"
@@ -86,34 +88,34 @@ const SignUpPage = () => {
 						</label>
 
 						{/* Username and Full Name */}
-						
-							<label className="input input-bordered rounded flex items-center gap-2 bg-[#153a54]">
-								<FaUser className="text-[#f8f9fd]"/>
-								<input
-									type="text"
-									className="grow"
-									placeholder="Username"
-									name="username"
-									onChange={handleInputChange}
-									value={formData.username}
-								/>
-							</label>
-							<label className="input input-bordered rounded flex items-center gap-2 bg-[#153a54]">
-								<MdDriveFileRenameOutline className="text-[#f8f9fd]"/>
-								<input
-									type="text"
-									className="grow"
-									placeholder="Full Name"
-									name="fullName"
-									onChange={handleInputChange}
-									value={formData.fullName}
-								/>
-							</label>
-				
+
+						<label className="input input-bordered rounded flex items-center gap-2 bg-[#153a54]">
+							<FaUser className="text-[#f8f9fd]" />
+							<input
+								type="text"
+								className="grow"
+								placeholder="Username"
+								name="username"
+								onChange={handleInputChange}
+								value={formData.username}
+							/>
+						</label>
+						<label className="input input-bordered rounded flex items-center gap-2 bg-[#153a54]">
+							<MdDriveFileRenameOutline className="text-[#f8f9fd]" />
+							<input
+								type="text"
+								className="grow"
+								placeholder="Full Name"
+								name="fullName"
+								onChange={handleInputChange}
+								value={formData.fullName}
+							/>
+						</label>
+
 
 						{/* Password */}
 						<label className="input input-bordered rounded flex items-center gap-2 bg-[#153a54]">
-							<MdPassword className="text-[#f8f9fd]"/>
+							<MdPassword className="text-[#f8f9fd]" />
 							<input
 								type="password"
 								className="grow"
@@ -126,7 +128,7 @@ const SignUpPage = () => {
 
 						{/* Sign Up Button */}
 						<button className="btn rounded-full bg-[#dff2fe] text-[#153a54]">
-							{isPending? "Loading..." : "Sign Up"}
+							{isPending ? "Loading..." : "Sign Up"}
 						</button>
 						{isError && <p className="text-red-500 text-center">{error.message}</p>}
 					</form>

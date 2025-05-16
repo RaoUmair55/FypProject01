@@ -1,6 +1,6 @@
 @import "tailwindcss";
 @plugin "daisyui";
-@tailwind utilities;
+/* @tailwind utilities; */
 
 
 .card{
@@ -15,6 +15,8 @@
   @apply hover:shadow-[#153a54];
 }
 
+
+
 input::placeholder{
   color: #f8f9fd;
 }
@@ -28,3 +30,6 @@ textarea{
   font-size: .9rem;
 }
 
+.height-self{
+  height:96dvh;
+}

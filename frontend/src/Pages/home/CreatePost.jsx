@@ -99,7 +99,7 @@ const CreatePost = () => {
 					</div>
 				)}
 
-				<div className='flex justify-between border-t py-2 border-t-gray-700'>
+				<div className='flex justify-between border-t py-2 border-[#dce1e7]'>
 					<div className='flex gap-1 items-center'>
 						<CiImageOn
 							className='fill-[#153a54] w-6 h-6 cursor-pointer'
@@ -108,7 +108,7 @@ const CreatePost = () => {
 						<BsEmojiSmileFill className='fill-[#153a54] w-5 h-5 cursor-pointer' />
 					</div>
 					<input type='file' accept="image/*" hidden ref={imgRef} onChange={handleImgChange} />
-					<button className='btn btn-[#153a54] rounded-full btn-sm text-white px-4'>
+					<button className='btn  bg-[#1d9bf0] text-white rounded-full btn-sm hover:bg-[#1a8cd8] px-4'>
 						{isPending ? "Posting..." : "Post"}
 					</button>
 				</div>

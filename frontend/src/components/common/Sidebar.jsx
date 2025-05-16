@@ -45,10 +45,10 @@ const Sidebar = () => {
   const {data} = useQuery({queryKey: ["authUser"]});
 
 	return (
-		<div className='md:flex-[4_4_0] w-18 max-w-72 md:w-full md:block'>
-			<div className='sticky top-0 left-0 h-1/6 flex flex-col border-2 border-gray-400 w-20 md:w-full rounded-2xl shadow-2xs bg-[#ebebeb] p-4'>
+		<div className='md:flex-[4_4_0] w-18 max-w-72 md:w-full md:block '>
+			<div className='sticky top-0 left-0 height-self  flex flex-col border-2 border-gray-800 w-20 md:w-full rounded-2xl bg-[#153a542c] p-4 shadow-2xl shadow-white'>
 				<Link to='/' className='flex justify-center items-center md:justify-start'>
-					<XSvg className='px-2 w-32 h-32 rounded-full fill-white' />
+					<XSvg className='px-2 w-32 rounded-full fill-white' />
 				</Link>
 				<ul className='flex flex-col gap-3 mt-4'>
 					<li className='flex justify-center md:justify-start'>
@@ -56,8 +56,8 @@ const Sidebar = () => {
 							to='/'
 							className='flex gap-3 items-center bg-[#dff2fe] text-[#153a54] font-medium transition-all rounded-2xl duration-300 py-2 pl-2 pr-4 max-w-fit cursor-pointer'
 						>
-							<MdHomeFilled className='w-8 h-8 text-[#dff2fe]' />
-							<span className=' text-lg hidden md:block'>Home</span>
+							<MdHomeFilled className='w-8 h-8 text-[#0f1419]' />
+							<span className=' text-lg hidden text-[#0f1419] md:block'>Home</span>
 						</Link>
 					</li>
 					<li className='flex justify-center md:justify-start'>
@@ -65,18 +65,18 @@ const Sidebar = () => {
 							to='/notifications'
 							className='flex gap-3 items-center hover:bg-[#dff2fe] text-[#153a54] transition-all rounded-2xl duration-300 py-2 pl-2 pr-4 max-w-fit cursor-pointer'
 						>
-							<IoNotifications className='w-6 h-6 text-[#dff2fe]' />
-							<span className='text-lg hidden md:block'>Notifications</span>
+							<IoNotifications className='w-6 h-6 text-[#0f1419] ' />
+							<span className='text-lg  hidden md:block'>Notifications</span>
 						</Link>
 					</li>
 
 					<li className='flex justify-center md:justify-start'>
 						<Link
 							to={`/profile/${data?.username}`}
-							className='flex gap-3 items-center hover:bg-[#dff2fe] text-[#dff2fe] transition-all rounded-2xl duration-300 py-2 pl-2 pr-4 max-w-fit cursor-pointer'
+							className='flex gap-3 items-center hover:bg-[#dff2fe] text-[#0f1419] transition-all rounded-2xl duration-300 py-2 pl-2 pr-4 max-w-fit cursor-pointer'
 						>
-							<FaUser className='w-6 h-6 text-[#dff2fe]' />
-							<span className='text-lg hidden md:block'>Profile</span>
+							<FaUser className='w-6 h-6 text-[#0f1419]' />
+							<span className='text-lg hidden md:block '>Profile</span>
 						</Link>
 					</li>
 				</ul>
