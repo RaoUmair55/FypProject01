@@ -103,6 +103,10 @@ export const login = async (req, res) => {
         if (!user) {
             return res.status(400).json({ error: "User not found" });
         }
+
+        if (!user.isVerified) {
+            return res.status(400).json({ error: "User not verified. Please check your email for the OTP." });
+        }
         const isPasswordMatch = await bcrypt.compare(password, user?.password || "");
         if (!isPasswordMatch) {
             return res.status(400).json({ error: "Invalid credentials" });
