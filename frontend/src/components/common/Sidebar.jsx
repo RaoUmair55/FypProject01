@@ -46,7 +46,7 @@ const Sidebar = () => {
 
 	return (
 		<div className='md:flex-[4_4_0] w-18 max-w-72 md:w-full md:block'>
-			<div className='sticky top-0 left-0 h-1/4 flex flex-col border-2 border-gray-400 w-20 md:w-full rounded-2xl bg-[#153a542c] p-4'>
+			<div className='sticky top-0 left-0 h-1/6 flex flex-col border-2 border-gray-400 w-20 md:w-full rounded-2xl shadow-2xs bg-[#ebebeb] p-4'>
 				<Link to='/' className='flex justify-center items-center md:justify-start'>
 					<XSvg className='px-2 w-32 h-32 rounded-full fill-white' />
 				</Link>

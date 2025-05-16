@@ -15,10 +15,6 @@
   @apply hover:shadow-[#153a54];
 }
 
-body{
-  background-color: #153a541f;
-}
-
 input::placeholder{
   color: #f8f9fd;
 }
