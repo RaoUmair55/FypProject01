@@ -146,7 +146,7 @@ const Post = ({ post }) => {
 							{postOwner.fullName}
 						</Link>
 						<span className='text-gray-700 flex gap-1 text-sm '>
-							<Link to={`/profile/${postOwner.username}`}>@{postOwner.username}</Link>
+							<Link to={`/profile/${postOwner.username}`}>@{postOwner.university}</Link>
 							<span>·</span>
 							<span>{formattedDate}</span>
 						</span>
