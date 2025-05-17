@@ -69,7 +69,7 @@ const EditProfileModal = ({authUser}) => {
 	return (
 		<>
 			<button
-				className='btn btn-outline rounded-full btn-sm'
+				className='btn  bg-[#1d9bf0] text-white hover:bg-[#1a8cd8] rounded-full btn-sm'
 				onClick={() => document.getElementById("edit_profile_modal").showModal()}
 			>
 				Edit profile

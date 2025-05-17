@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
+
 import XSvg from "../../../components/svg/X";
 
 import { MdOutlineMail } from "react-icons/md";
@@ -106,7 +107,12 @@ const LoginPage = () => {
 				</div>
 			</div>
 		</div>
+
 		</>
 	);
+
 };
+
+
+
 export default LoginPage;
