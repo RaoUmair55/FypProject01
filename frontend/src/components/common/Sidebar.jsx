@@ -4,45 +4,50 @@ import { MdHomeFilled } from "react-icons/md";
 import { IoNotifications } from "react-icons/io5";
 import { FaUser } from "react-icons/fa";
 import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import { BiLogOut } from "react-icons/bi";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
 const Sidebar = () => {
+   const queryClient = useQueryClient();
 
-	const queryClient = useQueryClient();
-	
-	// logging out the user
-	const {mutate:logoutMutation, isPending, isError, error} = useMutation({
-		mutationFn: async () => {
-			try {
-				const res = await fetch("api/auth/logout", {
-					method: "POST",
-				})
-				const data = await res.json();
+   // logging out the user
+   const {
+      mutate: logoutMutation,
+      isPending,
+      isError,
+      error,
+   } = useMutation({
+      mutationFn: async () => {
+         try {
+            const res = await fetch("api/auth/logout", {
+               method: "POST",
+            });
+            const data = await res.json();
 
-				if (!res.ok){
-					throw new Error(data.error || "Something went wrong")
-				}
-			} catch (error) {
-				throw new Error(error)
-			}
-		},
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ["authUser"] });
-			toast.success("Logout successful");
-		},
-		onError: () => {
-			toast.error("Couldn't logout")
-		}
-	})
+            if (!res.ok) {
+               throw new Error(data.error || "Something went wrong");
+            }
+         } catch (error) {
+            throw new Error(error);
+         }
+      },
+      onSuccess: () => {
+         queryClient.invalidateQueries({ queryKey: ["authUser"] });
+         toast.success("Logout successful");
+      },
+      onError: () => {
+         toast.error("Couldn't logout");
+      },
+   });
 
-	// const data = {						// sample info
-	// 	fullName: "John Doe",
-	// 	username: "johndoe",
-	// 	profileImg: "/avatars/boy1.png",
-	// };
-  const {data} = useQuery({queryKey: ["authUser"]});
+   // const data = {						// sample info
+   // 	fullName: "John Doe",
+   // 	username: "johndoe",
+   // 	profileImg: "/avatars/boy1.png",
+   // };
+   const { data } = useQuery({ queryKey: ["authUser"] });
 
 	return (
 		<div className='md:flex-[4_4_0] w-18 max-w-72 md:w-full md:block '>
