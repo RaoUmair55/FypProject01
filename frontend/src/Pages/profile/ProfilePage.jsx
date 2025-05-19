@@ -109,27 +109,26 @@ const ProfilePage = () => {
 
 	return (
 		<>
-			<div className='flex-[4_4_0]  border-r border-gray-700 min-h-screen '>
+			<div className='flex-[4_4_0] rounded-2xl border-2 border-gray-300 min-h-screen bg-white '>
 				{/* HEADER */}
 				{(isLoading || isRefetching) && <ProfileHeaderSkeleton />}
 				{!isLoading && !isRefetching && !user && <p className='text-center text-lg mt-4'>User not found</p>}
 				<div className='flex flex-col'>
 					{!isLoading && !isRefetching && user && (
 						<>
-							<div className='flex gap-10 px-4 py-2 items-center'>
+							<div className='flex gap-10 px-4 py-2 items-center text-black'>
 								<Link to='/'>
-									<FaArrowLeft className='w-4 h-4' />
+									<FaArrowLeft className='w-4 h-4 text-[#153a54]' />
 								</Link>
 								<div className='flex flex-col'>
-									<p className='font-bold text-lg'>{isMyProfile? user?.fullName : anonymous}</p>
-									<span className='text-sm text-slate-500'>{POSTS?.length} posts</span>
+									<p className='font-bold text-lg'>{user?.fullName}</p>
 								</div>
 							</div>
 							{/* COVER IMG */}
 							<div className='relative group/cover'>
 								<img
 									src={coverImg || user?.coverImg || "/cover.png"}
-									className='h-52 w-full object-cover'
+									className='h-52 w-full object-cover rounded-lg'
 									alt='cover image'
 								/>
 								{isMyProfile && (
@@ -192,7 +191,7 @@ const ProfilePage = () => {
 								)}
 							</div>
 
-							<div className='flex flex-col gap-4 mt-14 px-4'>
+							<div className='flex flex-col gap-4 mt-6 px-4 text-black'>
 								<div className='flex flex-col'>
 									<span className='font-bold text-lg'>{isMyProfile? user?.fullName : anonymous}</span>
 									<span className='text-sm text-slate-500'>@{user?.university}</span>
@@ -224,18 +223,18 @@ const ProfilePage = () => {
 								</div>
 								<div className='flex gap-2'>
 									<div className='flex gap-1 items-center'>
-										<span className='font-bold text-xs'>{user?.following.length}</span>
-										<span className='text-slate-500 text-xs'>Following</span>
+										<span className='font-bold text-sm'>{user?.following.length}</span>
+										<span className='text-slate-500 text-sm'>Following</span>
 									</div>
 									<div className='flex gap-1 items-center'>
-										<span className='font-bold text-xs'>{user?.followers.length}</span>
-										<span className='text-slate-500 text-xs'>Followers</span>
+										<span className='font-bold text-sm'>{user?.followers.length}</span>
+										<span className='text-slate-500 text-sm'>Followers</span>
 									</div>
 								</div>
 							</div>
-							<div className='flex w-full border-b border-gray-700 mt-4'>
+							<div className='flex w-full border-y border-gray-400 mt-4'>
 								<div
-									className='flex justify-center flex-1 p-3 hover:bg-secondary transition duration-300 relative cursor-pointer'
+									className='flex justify-center text-[#153a54] flex-1 p-3 transition duration-300 relative cursor-pointer'
 									onClick={() => setFeedType("posts")}
 								>
 									Posts
@@ -244,7 +243,7 @@ const ProfilePage = () => {
 									)}
 								</div>
 								<div
-									className='flex justify-center flex-1 p-3 text-slate-500 hover:bg-secondary transition duration-300 relative cursor-pointer'
+									className='flex justify-center flex-1 p-3 text-slate-500 transition duration-300 relative cursor-pointer'
 									onClick={() => setFeedType("likes")}
 								>
 									Likes
@@ -256,7 +255,7 @@ const ProfilePage = () => {
 						</>
 					)}
 
-					<Posts feedType={feedType} username={username} userId={user?._id} />
+					<Posts feedType={feedType} username={username} userId={user?._id} className="profilePost" />
 				</div>
 			</div>
 		</>

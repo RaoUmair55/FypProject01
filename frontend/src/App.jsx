@@ -15,6 +15,7 @@ import LoadingSpinner from './components/common/LoadingSpinner'
 import { useEffect } from 'react'
 import VerifyOTPPage from './Pages/auth/signup/VerifyEmail'
 
+
 function App() {
   
   const {data:authUser, isLoading, isError, error} = useQuery({

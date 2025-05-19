@@ -7,7 +7,7 @@ import  {getUniversityFromEmail}  from "../utills/universityUtills.js";
 export const getUserProfile = async (req, res) => {
   const { id } = req.params;
   try {
-    const user = await User.findById( id ).select("-password -__v");
+    const user = await User.findById(id).select("-password -__v");
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
