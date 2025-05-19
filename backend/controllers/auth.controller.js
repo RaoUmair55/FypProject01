@@ -93,7 +93,7 @@ export const verifyOTP = async (req, res) => {
     }
 
     user.isVerified = true;
-    user.otp = null;
+    user.otp = "You have verified your email";
     user.otpExpiresAt = null;
     await user.save();
 

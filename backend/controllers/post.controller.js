@@ -6,10 +6,11 @@ import { uploadOnCloudinary } from "../utills/uploadCloudinary.js";
 
 export const createPost = async (req, res) => {
     try {
-          console.log('Received text:', req.body.text);
-        console.log('Received file:', req.file); // Check the file uploaded (if any)
+        //   console.log('Received text:', req.body.text);
+        // console.log('Received file:', req.file); // Check the file uploaded (if any)
 
         const text = req.body.text;
+        // const category = req.body.category;
         const localFilePath = req.file?.path;
 
          let imageUrl = '';
@@ -21,7 +22,7 @@ export const createPost = async (req, res) => {
         //  fs.unlinkSync(localFilePath);
         }
         if (!text) {
-            return res.status(400).json({ error: "Text is required" });
+            return res.status(400).json({ error: "Text and category are required" });
         }
         const userId = req.user._id; // Assuming you have the user ID in req.user
         const user = await User.findById(userId);
@@ -34,6 +35,7 @@ export const createPost = async (req, res) => {
             text,
             img: imageUrl,
             university: user.university,
+            // category
         });
 
 
@@ -242,13 +244,13 @@ export const getUserPosts = async (req, res) => {
     } 
 }
 
-// export const getPostsByUniversity = async (req, res) => {
-//     try {
-//         const { university } = req.params; // Assuming the university is passed as a URL parameter
-//         const posts = await Post.find({ university }).populate("user", "username fullName university").sort({ createdAt: -1 });
-//         return res.status(200).json(posts);
-//     } catch (error) {
-//         console.error("Error in get posts by university controller",error);
-//         res.status(500).json({ message: "Server error" });
-//     } 
-// }
+export const getPostsByCategory = async (req, res) => {
+    try {
+        const { category } = req.params; // Assuming the category is passed as a URL parameter
+        const posts = await Post.find({ category }).populate("user", "username fullName university").sort({ createdAt: -1 });
+        return res.status(200).json(posts);
+    } catch (error) {
+        console.error("Error in get posts by category controller",error);
+        res.status(500).json({ error: "Server error" });
+    } 
+}
