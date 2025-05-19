@@ -18,6 +18,9 @@ const Posts = ({feedType, username, userId}) => {
 				return `/api/posts/userPosts/${username}`;
 			case "likes":
 				return `/api/posts/getlikedPost/${userId}`;
+			
+			case "category":
+				return `/api/posts/category/${categoryType}`;			// department, transport, announcement, events, other
 
 			default:
 				return "/api/posts/all";
