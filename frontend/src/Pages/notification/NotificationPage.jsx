@@ -87,13 +87,11 @@ const NotificationPage = () => {
 							{notification.type === "follow" && <FaUser className='w-7 h-7 text-primary' />}
 							{notification.type === "like" && <FaHeart className='w-7 h-7 text-red-500' />}
 							<Link to={`/profile/${notification.from.username}`} >
-							<Link to={`/profile/${notification.from.username}`} >
 								<div className='avatar'>
 									<div className='w-8 rounded-full'>
 										<img src={notification.from.profileImg || "/avatar-placeholder.png"} />
 									</div>
 								</div>
-								<div className='flex gap-1 text-black'>
 								<div className='flex gap-1 text-black'>
 									<span className='font-bold'>@{notification.from.username}</span>{" "}
 									{notification.type === "follow" ? "followed you" : "liked your post"}
