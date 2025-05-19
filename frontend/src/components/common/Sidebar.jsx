@@ -4,53 +4,58 @@ import { MdHomeFilled } from "react-icons/md";
 import { IoNotifications } from "react-icons/io5";
 import { FaUser } from "react-icons/fa";
 import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import { BiLogOut } from "react-icons/bi";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
 const Sidebar = () => {
+   const queryClient = useQueryClient();
 
-	const queryClient = useQueryClient();
-	
-	// logging out the user
-	const {mutate:logoutMutation, isPending, isError, error} = useMutation({
-		mutationFn: async () => {
-			try {
-				const res = await fetch("api/auth/logout", {
-					method: "POST",
-				})
-				const data = await res.json();
+   // logging out the user
+   const {
+      mutate: logoutMutation,
+      isPending,
+      isError,
+      error,
+   } = useMutation({
+      mutationFn: async () => {
+         try {
+            const res = await fetch("api/auth/logout", {
+               method: "POST",
+            });
+            const data = await res.json();
 
-				if (!res.ok){
-					throw new Error(data.error || "Something went wrong")
-				}
-			} catch (error) {
-				throw new Error(error)
-			}
-		},
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ["authUser"] });
-			toast.success("Logout successful");
-		},
-		onError: () => {
-			toast.error("Couldn't logout")
-		}
-	})
+            if (!res.ok) {
+               throw new Error(data.error || "Something went wrong");
+            }
+         } catch (error) {
+            throw new Error(error);
+         }
+      },
+      onSuccess: () => {
+         queryClient.invalidateQueries({ queryKey: ["authUser"] });
+         toast.success("Logout successful");
+      },
+      onError: () => {
+         toast.error("Couldn't logout");
+      },
+   });
 
-	// const data = {						// sample info
-	// 	fullName: "John Doe",
-	// 	username: "johndoe",
-	// 	profileImg: "/avatars/boy1.png",
-	// };
-  const {data} = useQuery({queryKey: ["authUser"]});
+   // const data = {						// sample info
+   // 	fullName: "John Doe",
+   // 	username: "johndoe",
+   // 	profileImg: "/avatars/boy1.png",
+   // };
+   const { data } = useQuery({ queryKey: ["authUser"] });
 
 	return (
 		<div className='md:flex-[4_4_0] w-18 max-w-72 md:w-full md:block '>
-			<div className='sticky top-0 left-0 height-self  flex flex-col border-2 border-gray-800 w-20 md:w-full rounded-2xl bg-[#153a542c] p-4 shadow-2xl shadow-white'>
-				<Link to='/' className='flex justify-center items-center md:justify-start'>
-					<XSvg className='px-2 w-32 rounded-full fill-white' />
+			<div className='sticky top-0 left-0 height-self  flex flex-col border-2 border-gray-300 w-20 md:w-full rounded-2xl bg-white shadow-2xl	shadow-gray-300'>
+				<Link to='/' className='flex justify-center items-center md:justify-start bg-[#ecf1fc] rounded-t-2xl'>
+					<XSvg className='px-2 w-32 rounded-full fill-white ' />
 				</Link>
-				<ul className='flex flex-col gap-3 mt-4'>
+				<ul className='flex flex-col gap-3 mt-4 p-4'>
 					<li className='flex justify-center md:justify-start'>
 						<Link
 							to='/'
@@ -75,7 +80,7 @@ const Sidebar = () => {
 							to={`/profile/${data?.username}`}
 							className='flex gap-3 items-center hover:bg-[#dff2fe] text-[#0f1419] transition-all rounded-2xl duration-300 py-2 pl-2 pr-4 max-w-fit cursor-pointer'
 						>
-							<FaUser className='w-6 h-6 text-[#0f1419]' />
+							<FaUser className='w-6 h-6 text-[#0f1419] ' />
 							<span className='text-lg hidden md:block '>Profile</span>
 						</Link>
 					</li>
@@ -83,7 +88,7 @@ const Sidebar = () => {
 				{data && (
 					<Link
 						to={`/profile/${data.username}`}
-						className='mt-auto mb-10 flex gap-2 items-start transition-all duration-300 bg-[#dff2fe] rounded-2xl py-2 px-4 '
+						className='mt-auto mb-10 mx-4 flex gap-2 items-start transition-all duration-300 bg-[#dff2fe] rounded-2xl py-2 px-4  '
 					>
 						<div className='avatar hidden md:inline-flex'>
 							<div className='w-8 rounded-full'>

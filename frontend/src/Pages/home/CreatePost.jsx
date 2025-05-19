@@ -73,7 +73,7 @@ const CreatePost = () => {
 	};
 
 	return (
-		<div className='flex p-4 items-start gap-4 border-2 rounded-2xl my-4 border-gray-7	00 bg-[#153a542c]'>
+		<div className='flex p-4 items-start gap-4 border-2 rounded-2xl my-4 border-gray-300 bg-[#fff]'>
 			<div className='avatar'>
 				<div className='w-8 rounded-full'>
 					<img src={data.profileImg || "/avatar-placeholder.png"} />
@@ -81,7 +81,7 @@ const CreatePost = () => {
 			</div>
 			<form className='flex flex-col gap-2 w-full' onSubmit={handleSubmit}>
 				<textarea
-					className='textarea bg-[#153a54] rounded-2xl w-full p-3 text-lg resize-none focus:outline-none border-gray-400'
+					className='textarea bg-[#ecf1fc] rounded-2xl w-full p-3 text-lg resize-none focus:outline-none border-gray-400'
 					placeholder='What is happening?!'
 					value={text}
 					onChange={(e) => setText(e.target.value)}
