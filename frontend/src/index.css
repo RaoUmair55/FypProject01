@@ -22,7 +22,7 @@ input::placeholder{
 }
 
 textarea::placeholder {
-  color: #f8f9fd;
+  color: black;
 }
 
 textarea{
