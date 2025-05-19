@@ -60,6 +60,24 @@ export const signup = async (req, res) => {
     }
 };
 
+//api/auth/resend-otp
+export const resendEmail = async (req, res) => {
+    const { email } = req.body;
+
+    try {
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(400).json({ error: "User not found" });
+        }
+
+        await sendOTP(email, user.otp);
+        res.status(200).json({ message: "Verification email resent" });
+    } catch (error) {
+        console.error("Error resending email:", error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+};
+
 // POST /api/auth/verify
 export const verifyOTP = async (req, res) => {
   const { email, otp } = req.body;
