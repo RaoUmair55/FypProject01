@@ -21,12 +21,16 @@ input::placeholder{
   color: #f8f9fd;
 }
 
+input
+{
+  color: black;
+}
+
 textarea::placeholder {
   color: black;
 }
 
 textarea{
-  color: #f8f9fd;
   font-size: .9rem;
 }
 
