@@ -21,6 +21,11 @@ input::placeholder{
   color: #f8f9fd;
 }
 
+input
+{
+  color: black;
+}
+
 textarea::placeholder {
   color: black;
 }
