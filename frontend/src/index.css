@@ -26,8 +26,9 @@ textarea::placeholder {
 }
 
 textarea{
-  color: #f8f9fd;
+  color: #0d0d0e;
   font-size: .9rem;
+
 }
 
 .height-self{

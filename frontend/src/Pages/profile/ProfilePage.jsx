@@ -27,7 +27,7 @@ const ProfilePage = () => {
 	const coverImgRef = useRef(null);
 	const profileImgRef = useRef(null);
 
-	const {username} = useParams();
+	const {id} = useParams();
 	
 	const queryClient = useQueryClient();
 	const {follow, isPending} = useFollow();
@@ -37,7 +37,7 @@ const ProfilePage = () => {
 		queryKey: ["userProfile"],
 		queryFn: async () => {
 			try {
-				const res = await fetch(`/api/user/profile/${username}`)
+				const res = await fetch(`/api/user/profile/${id}`)
 				const data = await res.json();
 
 				if(!res.ok) {
@@ -105,7 +105,7 @@ const ProfilePage = () => {
 
 	useEffect(() => {
 		refetch();
-	}, [username, refetch])
+	}, [user?.id, refetch])
 
 	return (
 		<>
@@ -255,7 +255,7 @@ const ProfilePage = () => {
 						</>
 					)}
 
-					<Posts feedType={feedType} username={username} userId={user?._id} className="profilePost" />
+					<Posts feedType={feedType}  username={user?.username} className="profilePost" />
 				</div>
 			</div>
 		</>

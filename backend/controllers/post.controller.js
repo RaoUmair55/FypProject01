@@ -162,19 +162,23 @@ export const likeUnLike = async (req, res) => {
 }
 
 export const getAllPosts = async (req, res) => {
+     const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 15;
+    const skip = (page - 1) * limit;
     try {
-       const posts = await Post.find().sort({ createdAt: -1 }).populate({
-        path: "user",
-        select: "-password",
-       })
-         .populate({
+        const posts = await Post.find().sort({ createdAt: -1 }).populate({
+            path: "user",
+            select: "-password",
+        })
+        .populate({
             path: "comments.user",
             select: "-password -bio -followers -following -link",
-         })
+        }).limit(limit).skip(skip);
+        const totalPosts = await Post.countDocuments();
        if (posts.length === 0) {
             return res.status(200).json({ message: "No posts found" });
         }
-        return res.status(200).json(posts);
+        return res.status(200).json({ posts, total: totalPosts });
     } catch (error) {
         console.error("Error in get all posts controller",error);
         res.status(500).json({ error: "Server error" });
@@ -230,19 +234,38 @@ export const getFollowedPosts = async (req, res) => {
 }
    
 export const getUserPosts = async (req, res) => {
-    try {
-        const { username } = req.params; // Assuming the username is passed as a URL parameter
-        const user = await User.findOne({ username });
-        if (!user) {
-            return res.status(404).json({ error: "User not found" });
-        }
-        const posts = await Post.find({ user: user._id }).populate("user", "username fullName university").sort({ createdAt: -1 });
-        return res.status(200).json(posts);
-    } catch (error) {
-        console.error("Error in get user posts controller",error);
-        res.status(500).json({ error: "Server error" });
-    } 
-}
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 15;
+  const skip = (page - 1) * limit;
+
+  try {
+    const { username } = req.params;
+
+    if (!username) {
+      return res.status(400).json({ error: "Username is required" });
+    }
+
+    const user = await User.findOne({ username });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const posts = await Post.find({ user: user._id })
+      .populate("user", "username fullName university")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    const totalPosts = await Post.countDocuments({ user: user._id });
+
+    return res.status(200).json({ posts, total: totalPosts });
+  } catch (error) {
+    console.error("Error in get user posts controller", error);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
 
 export const getPostsByCategory = async (req, res) => {
     try {
