@@ -7,6 +7,7 @@ import useFollow from "../../hooks/useFollow";
 import RightPanelSkeleton from "../skeletons/RightPanelSkeleton";
 import LoadingSpinner from "./LoadingSpinner";
 import LoadingRing from "./LoadingRing";
+import { anonymous } from "../../utils/anonymous";
 
 const RightPanel = () => {
 	// const isLoading = false;
@@ -48,7 +49,7 @@ const RightPanel = () => {
 					{!isLoading &&
 						suggestedUsers?.map((user) => (
 							<Link
-								to={`/profile/${user.username}`}
+								to={`/profile/${user._id}`}
 								className='flex items-center text-[#0f1419] justify-between gap-4'
 								key={user._id}
 							>
@@ -60,9 +61,9 @@ const RightPanel = () => {
 									</div>
 									<div className='flex flex-col'>
 										<span className='font-semibold tracking-tight truncate w-28'>
-											{user.fullName}
+											{anonymous}
 										</span>
-										<span className='text-sm text-slate-500'>@{user.username}</span>
+										<span className='text-sm text-slate-500'>@{user.university}</span>
 									</div>
 								</div>
 								<div>

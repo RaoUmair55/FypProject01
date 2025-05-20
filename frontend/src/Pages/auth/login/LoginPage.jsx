@@ -117,7 +117,7 @@ const LoginPage = () => {
           </form>
 
           <div className="flex flex-col gap-2 mt-4">
-            <button
+            <button data-tip="Enter Your email to verify"
               className="text-[#153a54] text-lg text-left underline hover:text-blue-700"
               onClick={verifyEmail}
               disabled={verifyEmailMutation.isPending}

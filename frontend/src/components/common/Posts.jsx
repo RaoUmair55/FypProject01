@@ -1,75 +1,80 @@
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInView } from "react-intersection-observer";
 import Post from "./Post";
 import PostSkeleton from "../skeletons/PostSkeleton";
-// import { POSTS } from "../../utils/db/dummy";		// dummy until we get posts from db
-import {useQuery} from "@tanstack/react-query"
 import { useEffect } from "react";
 
-	// feed category (the prop)
-const Posts = ({feedType, username, userId}) => {
-	// const isLoading = false;
+const Posts = ({ feedType, username, userId }) => {
+  const { ref, inView } = useInView();
 
-	const getPostEndPoint = () => {
-		switch(feedType) {
-			case "forYou": 
-				return "/api/posts/all";
-			case "following": 
-				return "/api/posts/following";
-			case "posts":
-				return `/api/posts/userPosts/${username}`;
-			case "likes":
-				return `/api/posts/getlikedPost/${userId}`;
-			
-			case "category":
-				return `/api/posts/category/${categoryType}`;			// department, transport, announcement, events, other
+  const getPostEndPoint = () => {
+    switch (feedType) {
+      case "forYou":
+        return "/api/posts/all";
+      case "following":
+        return "/api/posts/following";
+      case "posts":
+        return username ? `/api/posts/userPosts/${username}` : null;
+      case "likes":
+        return userId ? `/api/posts/getlikedPost/${userId}` : null;
+      default:
+        return "/api/posts/all";
+    }
+  };
 
-			default:
-				return "/api/posts/all";
-		}
-	}
+  const POST_ENDPOINT = getPostEndPoint();
 
-	const POST_ENDPOINT	= getPostEndPoint();
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+  } = useInfiniteQuery({
+    queryKey: ["posts", feedType, username, userId],
+    queryFn: async ({ pageParam = 1 }) => {
+      if (!POST_ENDPOINT) {
+        throw new Error("Invalid endpoint. Missing username or userId.");
+      }
 
-	const {data:posts, isLoading, refetch, isRefetching} = useQuery({
-		queryKey: ["posts"],
-		queryFn: async () => {
-			try {
-				const res = await fetch(POST_ENDPOINT)
-				const data = await res.json()
+      const res = await fetch(`${POST_ENDPOINT}?page=${pageParam}&limit=15`);
+      const result = await res.json();
 
-				if (!res.ok) {
-					throw new Error(data.error || "Something went wrong")
-				}
+      if (!res.ok) {
+        throw new Error(result.error || "Something went wrong");
+      }
 
-				return data
-			} catch (error) {
-				throw new Error(error)
-			}
-		},
-	});
-	useEffect(() => { 
-		refetch();
-	}, [feedType, refetch, username])
+      return { posts: result.posts, nextPage: pageParam + 1, total: result.total };
+    },
+    enabled: !!POST_ENDPOINT, // Prevent fetch if endpoint is null
+    getNextPageParam: (lastPage, allPages) => {
+      const loadedPosts = allPages.flatMap((p) => p.posts).length;
+      return loadedPosts < lastPage.total ? lastPage.nextPage : undefined;
+    },
+    refetchOnWindowFocus: false,
+  });
 
-	return (
-		<>
-			{(isLoading || isRefetching) && (
-				<div className='flex flex-col justify-center'>
-					<PostSkeleton />
-					<PostSkeleton />
-					<PostSkeleton />
-				</div>
-			)}
-			{!isLoading && !isRefetching && posts?.length === 0 && <p className='text-center my-4'>No posts in this tab. Switch 👻</p>}
-			{!isLoading && !isRefetching && posts && (
-				<div>
-					{posts ? posts.map((post) => (
-						<Post key={post._id} post={post} />
-					)) : (
-						<p className='text-center my-4'>No posts found</p>
-					)}
-				</div>
-			)}
-		</>
-	);
+  useEffect(() => {
+    if (inView && hasNextPage) {
+      fetchNextPage();
+    }
+  }, [inView, hasNextPage, fetchNextPage]);
+
+  const posts = data?.pages.flatMap((page) => page.posts) || [];
+
+  return (
+    <div>
+      {isLoading && (
+        <>
+          <PostSkeleton />
+          <PostSkeleton />
+        </>
+      )}
+      {posts.map((post) => (post ? <Post key={post._id} post={post} /> : null))}
+      {isFetchingNextPage && <PostSkeleton />}
+      {hasNextPage && <div ref={ref} className="text-center py-5">Loading more...</div>}
+    </div>
+  );
 };
+
 export default Posts;
