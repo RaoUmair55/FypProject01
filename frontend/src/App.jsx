@@ -48,7 +48,7 @@ function App() {
   }
 
   return (
-    <div className=' flex max-w-7xl mx-auto gap-10 pt-3'>
+    <div className=' flex max-w-full mx-2 pt-3 md:gap-0 md:mx-12 sm:mx-5 '>
       
       
       {authUser && <Sidebar/>}
