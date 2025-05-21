@@ -7,11 +7,11 @@ const postSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    // category: {
-    //   type: String,
-    //   enum: ["Anouncement", "Department", "Event", "Other"],
-    //   required: true,
-    // },
+    category: {
+      type: String,
+      enum: ["Anouncement", "Department", "Events", "Other"],
+      required: true,
+    },
     text: {
       type: String,
       required: true,

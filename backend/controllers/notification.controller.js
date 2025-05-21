@@ -29,7 +29,7 @@ const deleteNotification = async (req, res) => {
 const getNotificationNumber = async (req, res) => {
     try {
         const userId = req.user._id; // Assuming you have the user ID in req.user
-        const notifications = await Notification.find({ to: userId, isRead: false });
+        const notifications = await Notification.find({ to: userId, new: true });
         res.status(200).json({ number: notifications.length });
     } catch (error) {
         console.error("Error in get notification number controller", error);
@@ -46,7 +46,7 @@ const markNotificationRead = async (req, res) => {
     const notification = await Notification.findByIdAndUpdate(
       id,
       { read: true },
-      { new: true }
+      { new: false }
     );
     if (!notification) {
       return res.status(404).json({ error: "Notification not found" });

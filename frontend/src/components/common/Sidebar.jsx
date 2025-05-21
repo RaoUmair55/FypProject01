@@ -39,24 +39,31 @@ const Sidebar = () => {
 			toast.error("Couldn't logout");
 		},
 	});
-
-	const { data: notificationCountData, isLoading: isCountLoading } = useQuery({
+const { data: notificationCountData, isLoading: isCountLoading } = useQuery({
   queryKey: ["notificationCount"],
   queryFn: async () => {
-    const res = await fetch("/api/notifications/number"); // your route
+    const res = await fetch("/api/notifications/number", {
+      method: "GET",
+      credentials: "include", // ✅ This sends cookies with the request
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
     if (!res.ok) {
-		console.error("Error fetching notification count");
-		throw new Error("Failed to fetch notification count");
-	}
-	const data = await res.json();
-    return data; // { number: 3 }
+      console.error("Error fetching notification count");
+      throw new Error("Failed to fetch notification count");
+    }
+
+    const data = await res.json();
+    return data; // { number: X }
   },
-  refetchInterval: 10000, // optional: auto-refresh every 10s
+  refetchInterval: 1000,
 });
-	const notificationCount = notificationCountData?.number || 0;
 
+const notificationCount = notificationCountData?.number || 1;
 
-	const { data, isLoading } = useQuery({ queryKey: ["authUser"] });
+const { data, isLoading } = useQuery({ queryKey: ["authUser"] });
 
 	if (isLoading) {
 		return <div className="p-4 text-center text-gray-600">Loading sidebar...</div>;

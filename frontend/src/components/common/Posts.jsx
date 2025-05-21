@@ -7,6 +7,7 @@ import { useEffect } from "react";
 const Posts = ({ feedType, username, userId }) => {
   const { ref, inView } = useInView();
 
+
   const getPostEndPoint = () => {
     switch (feedType) {
       case "forYou":

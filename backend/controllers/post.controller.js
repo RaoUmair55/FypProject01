@@ -10,7 +10,7 @@ export const createPost = async (req, res) => {
         // console.log('Received file:', req.file); // Check the file uploaded (if any)
 
         const text = req.body.text;
-        // const category = req.body.category;
+        const category = req.body.category;
         const localFilePath = req.file?.path;
 
          let imageUrl = '';
@@ -21,7 +21,8 @@ export const createPost = async (req, res) => {
          // Remove the local file after uploading to Cloudinary
         //  fs.unlinkSync(localFilePath);
         }
-        if (!text) {
+        if (!text || !category) {
+            console.log('Text or category is missing');
             return res.status(400).json({ error: "Text and category are required" });
         }
         const userId = req.user._id; // Assuming you have the user ID in req.user
@@ -35,7 +36,7 @@ export const createPost = async (req, res) => {
             text,
             img: imageUrl,
             university: user.university,
-            // category
+            category
         });
 
 
@@ -187,23 +188,36 @@ export const getAllPosts = async (req, res) => {
 
 // Get all posts liked by a user
 export const likedPost = async (req, res) => {
-    const userId = req.params.id; // Assuming you have the user ID in req.user
-    try {
-        const user = await User.findById(userId)
-        if (!user) {
-            return res.status(404).json({ error: "User not found" });
-        }
-        const likedPosts = await Post.find({ _id: { $in: user.likedPosts } })
-            .populate({
-               path: "user",
-               select: "-password -bio -followers -following -link", 
-            })
-        return res.status(200).json(likedPosts);
-    } catch (error) {
-        console.error("Error in get liked posts controller", error);
-        res.status(500).json({ error: "Server error" });
-    } 
-}
+  const { userId } = req.params;
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 15;
+  const skip = (page - 1) * limit;
+
+  try {
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const total = user.likedPosts.length;
+
+    // Slice likedPosts array for pagination
+    const paginatedPostIds = user.likedPosts.slice(skip, skip + limit);
+
+    const likedPosts = await Post.find({ _id: { $in: paginatedPostIds } })
+      .populate({
+        path: "user",
+        select: "-password -bio -followers -following -link", // customize as needed
+      })
+      .sort({ createdAt: -1 });
+
+    return res.status(200).json({ posts: likedPosts, total });
+  } catch (error) {
+    console.error("Error in get liked posts controller", error);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
 
 export const getFollowedPosts = async (req, res) => {
     try {
@@ -268,12 +282,29 @@ export const getUserPosts = async (req, res) => {
 
 
 export const getPostsByCategory = async (req, res) => {
-    try {
-        const { category } = req.params; // Assuming the category is passed as a URL parameter
-        const posts = await Post.find({ category }).populate("user", "username fullName university").sort({ createdAt: -1 });
-        return res.status(200).json(posts);
-    } catch (error) {
-        console.error("Error in get posts by category controller",error);
-        res.status(500).json({ error: "Server error" });
-    } 
-}
+  try {
+    const { category } = req.params;
+    const allowedCategories = ["Anouncement", "Department", "Events", "Other"];
+
+    if (!allowedCategories.includes(category)) {
+      return res.status(400).json({ error: "Invalid category" });
+    }
+
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 15;
+    const skip = (page - 1) * limit;
+
+    const total = await Post.countDocuments({ category });
+
+    const posts = await Post.find({ category })
+      .populate("user", "username fullName university")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    return res.status(200).json({ posts, total });
+  } catch (error) {
+    console.error("Error in get posts by category controller", error);
+    res.status(500).json({ error: "Server error" });
+  }
+};

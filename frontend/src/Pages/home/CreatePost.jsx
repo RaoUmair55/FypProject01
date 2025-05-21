@@ -8,6 +8,7 @@ import { toast } from "react-hot-toast";
 const CreatePost = () => {
    const [text, setText] = useState("");
    const [img, setImg] = useState(null);
+   const [category, setCategory] = useState("Department");
    const imgRef = useRef(null);
 
    const { data: authUser } = useQuery({ queryKey: ["authUser"] });
@@ -19,7 +20,7 @@ const CreatePost = () => {
       isError,
       error,
    } = useMutation({
-      mutationFn: async ({ text, img }) => {
+      mutationFn: async ({ text, img, category }) => {
          try {
             const formData = new FormData();
             // formData.append("text", text);`
@@ -27,6 +28,7 @@ const CreatePost = () => {
             if (img) {
                formData.append("image", img);
             }
+            formData.append("category", category);
             const res = await fetch("/api/posts/create", {
                method: "POST",
                body: formData,
@@ -69,7 +71,7 @@ const CreatePost = () => {
    const handleSubmit = (e) => {
       e.preventDefault();
       // alert("Post created successfully");
-      createPost({ text, img });
+      createPost({ text, img, category });
    };
 
    const handleImgChange = (e) => {
@@ -125,18 +127,21 @@ const CreatePost = () => {
                   name="category"
                   className="tab [--tab-bg:#ecf1fc] checked:text-black"
                   aria-label="Announcement"
+                  onChange={() => setCategory("Announcement")}
                />
                <input
                   type="radio"
                   name="category"
                   className="tab [--tab-bg:#ecf1fc] checked:text-black"
                   aria-label="Events"
+                  onChange={() => setCategory("Events")}
                />
                <input
                   type="radio"
                   name="category"
                   className="tab [--tab-bg:#ecf1fc] checked:text-black"
                   aria-label="Other"
+                  onChange={() => setCategory("Other")}
                />
             </div>
             </div>

@@ -7,7 +7,7 @@ const router = express.Router();
 
 router.get("/all", protectRoute, getAllPosts); 
 router.get("/following", protectRoute, getFollowedPosts); 
-router.get("/getlikedPost/:id", protectRoute, likedPost);
+router.get("/getlikedPost/:userId", protectRoute, likedPost);
 router.get("/userPosts/:username", protectRoute, getUserPosts);
 router.post('/create', protectRoute, upload.single("image"), createPost);
 router.post('/like/:id', protectRoute, likeUnLike);
