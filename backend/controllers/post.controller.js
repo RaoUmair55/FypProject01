@@ -16,6 +16,21 @@ export const createPost = async (req, res) => {
         const isAnonymous = req.body.isAnonymous || false; 
         const pipe = await pipeline('sentiment-analysis')
 
+        // Sentiment check when the text is not empty
+        const analyse = async (text) => {
+            const sentiment = await pipe(text)
+
+            return sentiment
+        }
+
+        const sentiment = await analyse(text)
+        console.log(`Sentiment: ${sentiment[0].label}`)
+
+        // if the sentiment is negative, throw error
+        if (sentiment[0]?.label == "NEGATIVE"){
+            // throw new Error("⚠️ Your post contains negative sentiment. Consider rephrasing.")
+            return res.status(400).json({error: "⚠️ Your post contains negative sentiment. Consider rephrasing."})
+        }
 
         let imageUrl = '';
         if (localFilePath) {
@@ -30,12 +45,7 @@ export const createPost = async (req, res) => {
             return res.status(400).json({ error: "Text and category are required" });
         }
 
-        // Sentiment check when the text is not empty
-        const analyse = async (text) => {
-            const sentiment = await pipe(text)
-
-            return sentiment
-        }
+        
 
         const userId = req.user._id; // Assuming you have the user ID in req.user
         const user = await User.findById(userId);
@@ -55,13 +65,6 @@ export const createPost = async (req, res) => {
 
         await post.save();
         // await notification.save();
-        const sentiment = await analyse(text)
-        console.log(`Sentiment: ${sentiment[0].label}`)
-
-        // if the sentiment is negative, throw error
-        if (sentiment[0]?.label == "NEGATIVE"){
-            return res.status(400).json({error: "⚠️ Your post contains negative sentiment. Consider rephrasing."})
-        }
 
         return res.status(201).json({ message: "Post created successfully", post});
 
