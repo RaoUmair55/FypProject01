@@ -9,8 +9,8 @@ const CreatePost = () => {
    const [text, setText] = useState("");
    const [img, setImg] = useState(null);
    const [category, setCategory] = useState("Department");
+   const [isAnonymous, setIsAnonymous] = useState(false);
    const imgRef = useRef(null);
-
    const { data: authUser } = useQuery({ queryKey: ["authUser"] });
    const queryClient = useQueryClient();
 
@@ -29,6 +29,7 @@ const CreatePost = () => {
                formData.append("image", img);
             }
             formData.append("category", category);
+            formData.append("isAnonymous", isAnonymous);
             const res = await fetch("/api/posts/create", {
                method: "POST",
                body: formData,
@@ -145,8 +146,8 @@ const CreatePost = () => {
                />
             </div>
             </div>
-            <span className="text-gray-500 flex gap-3 items-center">Post as anonymously
-               <input type="checkbox" defaultChecked className="toggle bg-black checked:bg-[#1a8cd8] " />
+            <span className="text-gray-500 flex gap-3 items-center">Post anonymously
+               <input type="checkbox" checked={isAnonymous} className="toggle bg-black checked:bg-[#1a8cd8] " onChange={() => setIsAnonymous(!isAnonymous)} />
             </span>
             
             {img && (

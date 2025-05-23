@@ -13,6 +13,7 @@ export const createPost = async (req, res) => {
         const text = req.body.text;
         const category = req.body.category;
         const localFilePath = req.file?.path;
+        const isAnonymous = req.body.isAnonymous || false; 
 
          let imageUrl = '';
         if (localFilePath) {
@@ -46,7 +47,8 @@ export const createPost = async (req, res) => {
             text,
             img: imageUrl,
             university: user.university,
-            category
+            category,
+            isAnonymous,
         });
 
 
