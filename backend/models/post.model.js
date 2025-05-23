@@ -25,6 +25,10 @@ const postSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    isAnonymous: {
+      type: Boolean,
+      default: false,
+    },
     likes: [
       {
         type: mongoose.Schema.Types.ObjectId,
