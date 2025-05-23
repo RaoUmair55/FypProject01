@@ -48,39 +48,42 @@ const Post = ({ post }) => {
 		}
 	})
 
-	const {mutate:likePost, isPending:isLiking} = useMutation({
-		mutationFn: async () => {
-			try {
-				console.log(post._id)
-				const id = post._id;
-				const res = await fetch(`/api/posts/like/${id}`, {
-					method: "POST",
-				});
+const { mutate: likePost, isPending: isLiking } = useMutation({
+	mutationFn: async () => {
+		try {
+			const res = await fetch(`/api/posts/like/${post._id}`, {
+				method: "POST",
+			});
+			const data = await res.json();
 
-				const data = await res.json();
-				
-				if (!res.ok) {
-					throw new Error(data.error || "Something went wrong");	
-				}
-
-				return data;
-			} catch (error) {
-				throw new Error(error);
+			if (!res.ok) {
+				throw new Error(data.error || "Something went wrong");
 			}
-		},
-		onSuccess: (updatedLikes) => {
-			toast.success("Post liked successfully");
-			queryClient.setQueryData(["posts"], (oldData) => {
-				return oldData.map(p => {
-					if (p._id === post._id) {
-						return {...p, likes:updatedLikes}
-					}
-					return p;
-				})
-			})
-		},
-		onError: (error) => { toast.error(error.message) }
-	})
+			return data; // assuming it's the updated post
+		} catch (error) {
+			throw new Error(error?.message || "Something went wrong");
+		}
+	},
+	onSuccess: (updatedPost) => {
+  toast.success("Post liked successfully");
+  
+  queryClient.setQueryData(["posts"], (oldPosts) => {
+	  if (!Array.isArray(oldPosts)) return oldPosts;
+	  
+	  return oldPosts.map((p) => {
+		  if (p._id === updatedPost._id) {
+			  return updatedPost; // ✅ replace entire post
+			}
+			return p;
+		});
+	});
+	queryClient.invalidateQueries({ queryKey: ["posts"] });
+},
+
+	onError: (error) => {
+		toast.error(error.message);
+	}
+});
 
 	const {mutate: commentPost, isPending:isCommenting} = useMutation({
 		mutationFn: async () => {
@@ -251,6 +254,7 @@ const Post = ({ post }) => {
 									}`}
 								>
 									{post.likes.length}
+
 								</span>
 							</div>
 						</div>

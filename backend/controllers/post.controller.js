@@ -147,30 +147,31 @@ export const likeUnLike = async (req, res) => {
 
     const alreadyLiked = post.likes.includes(userId);
 
-    if (!alreadyLiked) {
-      post.likes.push(userId);
-      await user.updateOne({ $addToSet: { likedPosts: postId } });
+   if (!alreadyLiked) {
+  post.likes.push(userId);
+  await user.updateOne({ $addToSet: { likedPosts: postId } });
 
-      await post.save();
+  await post.save();
 
-      // Only notify if the liker isn't the post owner
-      if (String(post.user._id) !== String(userId)) {
-        await Notification.create({
-          from: userId,
-          to: post.user._id,
-          type: "like",
-        });
-      }
+  if (String(post.user._id) !== String(userId)) {
+    await Notification.create({
+      from: userId,
+      to: post.user._id,
+      type: "like",
+    });
+  }
 
-      return res.status(200).json(post.likes);
-    } else {
-      post.likes = post.likes.filter((id) => String(id) !== String(userId));
-      await user.updateOne({ $pull: { likedPosts: postId } });
+  const updatedPost = await Post.findById(postId).populate("user", "university");
+  return res.status(200).json(updatedPost);
+} else {
+  post.likes = post.likes.filter((id) => String(id) !== String(userId));
+  await user.updateOne({ $pull: { likedPosts: postId } });
 
-      await post.save();
+  await post.save();
 
-      return res.status(200).json(post.likes);
-    }
+  const updatedPost = await Post.findById(postId).populate("user", "university");
+  return res.status(200).json(updatedPost);
+}
   } catch (error) {
     console.error("Error in like/unlike post controller", error);
     res.status(500).json({ error: "Server error" });
