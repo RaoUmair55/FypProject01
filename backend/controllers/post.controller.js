@@ -12,8 +12,10 @@ export const createPost = async (req, res) => {
         const category = req.body.category;
         const localFilePath = req.file?.path;
         const isAnonymous = req.body.isAnonymous || false; 
+        const pipe = await pipeline('sentiment-analysis')
 
-         let imageUrl = '';
+
+        let imageUrl = '';
         if (localFilePath) {
          const cloudinaryResult = await uploadOnCloudinary(localFilePath);
          imageUrl = cloudinaryResult?.secure_url;
@@ -28,7 +30,6 @@ export const createPost = async (req, res) => {
 
         // Sentiment check when the text is not empty
         const analyse = async (text) => {
-            const pipe = await pipeline('sentiment-analysis' )
             const sentiment = await pipe(text)
 
             return sentiment
@@ -52,9 +53,15 @@ export const createPost = async (req, res) => {
 
         await post.save();
         // await notification.save();
-        console.log(`Sentiment: ${analyse(text)}`)
-        constsentiment = analyse(text)
-        return res.status(201).json({ message: "Post created successfully", post, sentiment: sentiment });
+        const sentiment = await analyse(text)
+        console.log(`Sentiment: ${sentiment[0].label}`)
+
+        // if the sentiment is negative, throw error
+        if (sentiment[0]?.label == "NEGATIVE"){
+            return res.status(400).json({error: "⚠️ Your post contains negative sentiment. Consider rephrasing."})
+        }
+
+        return res.status(201).json({ message: "Post created successfully", post});
 
     } catch (error) {
         console.error(error);
