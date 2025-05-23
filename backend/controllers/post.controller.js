@@ -112,55 +112,58 @@ export const commentPost = async (req, res) => {
 }
 
 export const likeUnLike = async (req, res) => {
-    try {
-        
-        const postId = req.params.id;
-        const userId = req.user._id;
+  try {
+    const postId = req.params.id;
+    const userId = req.user._id;
 
-        const post = await Post.findById(postId);
-        if (!post) {
-            return res.status(404).json({ error: "Post not found" });
-        }
-//check if the university of post and user are same
-        const user = await User.findById(userId);
-        if (!user) {
-            return res.status(404).json({ error: "User not found" });
-        }
-        if (post.university !== user.university) {
-            return res.status(403).json({ error: "You are not authorized to like/unlike this post" });
-        }
-
-        const index = post.likes.indexOf(userId);
-        if (index === -1) {
-
-            post.likes.push(userId);
-            // Add the post ID to the user's likedPosts array
-            await user.updateOne({ $addToSet: { likedPosts: postId } });
-            await post.save();
-            const updatedLikes = post.likes
-            // Create a notification for the user who posted the post
-            const notification = await Notification.create({
-                from: userId,
-                to: post.user,
-                type: "like",
-            });
-            await notification.save();
-            return res.status(200).json(updatedLikes);
-        } else {
-            // Remove the post ID from the user's likedPosts array
-            await user.updateOne({ $pull: { likedPosts: postId } });
-            post.likes.splice(index, 1);
-            const updatedLikes = post.likes
-            await post.save();
-
-            return res.status(200).json(updatedLikes);
-        }
-    } catch (error) {
-        console.error("Error in like/unlike post controller",error);
-        res.status(500).json({ error: "Server error" });
-        
+    const post = await Post.findById(postId).populate("user", "university"); // populate post.user
+    if (!post) {
+      return res.status(404).json({ error: "Post not found" });
     }
-}
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Compare university values (assuming it's a string)
+    if (String(post.user.university) !== String(user.university)) {
+      return res
+        .status(403)
+        .json({ error: "You are not authorized to like/unlike this post" });
+    }
+
+    const alreadyLiked = post.likes.includes(userId);
+
+    if (!alreadyLiked) {
+      post.likes.push(userId);
+      await user.updateOne({ $addToSet: { likedPosts: postId } });
+
+      await post.save();
+
+      // Only notify if the liker isn't the post owner
+      if (String(post.user._id) !== String(userId)) {
+        await Notification.create({
+          from: userId,
+          to: post.user._id,
+          type: "like",
+        });
+      }
+
+      return res.status(200).json(post.likes);
+    } else {
+      post.likes = post.likes.filter((id) => String(id) !== String(userId));
+      await user.updateOne({ $pull: { likedPosts: postId } });
+
+      await post.save();
+
+      return res.status(200).json(post.likes);
+    }
+  } catch (error) {
+    console.error("Error in like/unlike post controller", error);
+    res.status(500).json({ error: "Server error" });
+  }
+};
 
 export const getAllPosts = async (req, res) => {
      const page = parseInt(req.query.page) || 1;

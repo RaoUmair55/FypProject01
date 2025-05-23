@@ -7,7 +7,6 @@ import { useEffect } from "react";
 const Posts = ({ feedType, username, userId }) => {
   const { ref, inView } = useInView();
 
-
   const getPostEndPoint = () => {
     switch (feedType) {
       case "forYou":
@@ -31,6 +30,8 @@ const Posts = ({ feedType, username, userId }) => {
     hasNextPage,
     isFetchingNextPage,
     isLoading,
+    isError,
+    error,
   } = useInfiniteQuery({
     queryKey: ["posts", feedType, username, userId],
     queryFn: async ({ pageParam = 1 }) => {
@@ -45,9 +46,13 @@ const Posts = ({ feedType, username, userId }) => {
         throw new Error(result.error || "Something went wrong");
       }
 
-      return { posts: result.posts, nextPage: pageParam + 1, total: result.total };
+      return {
+        posts: Array.isArray(result.posts) ? result.posts : [],
+        nextPage: pageParam + 1,
+        total: result.total || 0,
+      };
     },
-    enabled: !!POST_ENDPOINT, // Prevent fetch if endpoint is null
+    enabled: !!POST_ENDPOINT, // Only fetch if endpoint is valid
     getNextPageParam: (lastPage, allPages) => {
       const loadedPosts = allPages.flatMap((p) => p.posts).length;
       return loadedPosts < lastPage.total ? lastPage.nextPage : undefined;
@@ -61,7 +66,11 @@ const Posts = ({ feedType, username, userId }) => {
     }
   }, [inView, hasNextPage, fetchNextPage]);
 
-  const posts = data?.pages.flatMap((page) => page.posts) || [];
+  const posts = Array.isArray(data?.pages)
+    ? data.pages.flatMap((page) =>
+        Array.isArray(page?.posts) ? page.posts : []
+      )
+    : [];
 
   return (
     <div>
@@ -71,9 +80,24 @@ const Posts = ({ feedType, username, userId }) => {
           <PostSkeleton />
         </>
       )}
+
+      {!isLoading && posts.length === 0 && (
+        <p className="text-center text-gray-500 mt-4">No posts found.</p>
+      )}
+
       {posts.map((post) => (post ? <Post key={post._id} post={post} /> : null))}
+
       {isFetchingNextPage && <PostSkeleton />}
-      {hasNextPage && <div ref={ref} className="text-center py-5">Loading more...</div>}
+
+      {hasNextPage && (
+        <div ref={ref} className="text-center py-5 text-gray-400">
+          Loading more...
+        </div>
+      )}
+
+      {isError && (
+        <p className="text-red-500 text-center mt-4">{error.message}</p>
+      )}
     </div>
   );
 };

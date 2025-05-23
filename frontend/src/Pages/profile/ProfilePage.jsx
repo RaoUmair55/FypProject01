@@ -194,7 +194,7 @@ const ProfilePage = () => {
 
 								<div className='flex flex-col gap-4 mt-3 px-4 text-black py-4'>
 									<div className='flex flex-col'>
-										<span className='font-bold text-lg'>{isMyProfile? user?.fullName : anonymous}</span>
+										<span className='font-bold text-lg'>{ user?.fullName}</span>
 										<span className='text-sm text-slate-500'>@{user?.university}</span>
 										<span className='text-sm my-1'>{user?.bio}</span>
 									</div>

@@ -14,10 +14,10 @@ import { formatPostDate } from "../../utils/date";
 
 const Post = ({ post }) => {
 	const [comment, setComment] = useState("");
-	const {data:authUser} = useQuery({queryKey: ["authUser"]}); 
 	const queryClient = useQueryClient();
+	const authUser = queryClient.getQueryData(["authUser"]);
 
-		const postOwner = post.user;
+	const postOwner = post.user;
 	const isLiked = post.likes.includes(authUser._id)
 
 	const isMyPost = authUser._id === post.user._id;
@@ -51,7 +51,9 @@ const Post = ({ post }) => {
 	const {mutate:likePost, isPending:isLiking} = useMutation({
 		mutationFn: async () => {
 			try {
-				const res = await fetch(`/api/posts/like/${post._id}`, {
+				console.log(post._id)
+				const id = post._id;
+				const res = await fetch(`/api/posts/like/${id}`, {
 					method: "POST",
 				});
 
@@ -67,10 +69,7 @@ const Post = ({ post }) => {
 			}
 		},
 		onSuccess: (updatedLikes) => {
-			// toast.success("Post liked");
-
-			// queryClient.invalidateQueries({queryKey: ["posts"]})		// bad ui expreience bcz it refetches the posts
-			// update the cache for that post instead
+			toast.success("Post liked successfully");
 			queryClient.setQueryData(["posts"], (oldData) => {
 				return oldData.map(p => {
 					if (p._id === post._id) {
