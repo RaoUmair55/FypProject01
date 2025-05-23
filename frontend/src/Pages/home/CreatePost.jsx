@@ -4,8 +4,11 @@ import { useRef, useState } from "react";
 import { IoCloseSharp } from "react-icons/io5";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
+import { useEffect } from "react";
 
 const CreatePost = () => {
+   const textareaRef = useRef(null);
+   const categoryRef = useRef(null);
    const [text, setText] = useState("");
    const [img, setImg] = useState(null);
    const [category, setCategory] = useState("Department");
@@ -23,7 +26,6 @@ const CreatePost = () => {
       mutationFn: async ({ text, img, category }) => {
          try {
             const formData = new FormData();
-            // formData.append("text", text);`
             formData.append("text", text);
             if (img) {
                formData.append("image", img);
@@ -82,6 +84,64 @@ const CreatePost = () => {
       createPost({ text, img, category });
    };
 
+   const addAnimation = () => {
+      const textarea = textareaRef.current;
+      const categoryDiv = categoryRef.current;
+
+      if (textarea) {
+         textarea.style.transition = "height 0.2s ease";
+         textarea.style.height = "auto";
+         textarea.style.height = `${textarea.scrollHeight}px`;
+      }
+
+      if (categoryDiv && categoryDiv.classList.contains("hidden")) {
+         categoryDiv.classList.remove("hidden");
+
+         // Optional: Force reflow to restart animation
+         void categoryDiv.offsetWidth;
+
+         categoryDiv.classList.add("animate__animated", "animate__fadeInDown");
+
+         categoryDiv.addEventListener(
+            "animationend",
+            () => {
+               categoryDiv.classList.remove("animate__animated", "animate__fadeInDown");
+            },
+            { once: true }
+         );
+      }
+   };
+
+   useEffect(() => {
+      const handleClickOutside = (event) => {
+         if (
+            textareaRef.current &&
+            categoryRef.current &&
+            !textareaRef.current.contains(event.target) &&
+            !categoryRef.current.contains(event.target)
+         ) {
+            const categoryDiv = categoryRef.current;
+            categoryDiv.classList.remove("animate__fadeInDown");
+            categoryDiv.classList.add("animate__animated", "animate__fadeOutUp");
+
+            categoryDiv.addEventListener(
+               "animationend",
+               () => {
+                  categoryDiv.classList.add("hidden");
+                  categoryDiv.classList.remove("animate__animated", "animate__fadeOutUp");
+               },
+               { once: true }
+            );
+         }
+      };
+
+      document.addEventListener("click", handleClickOutside);
+      return () => {
+         document.removeEventListener("click", handleClickOutside);
+      };
+   }, []);
+
+
    const handleImgChange = (e) => {
       const file = e.target.files[0];
       if (file) {
@@ -101,10 +161,12 @@ const CreatePost = () => {
                className="textarea bg-[#ecf1fc] rounded-2xl w-full p-3 text-lg text-black resize-none focus:outline-none border-gray-400"
                placeholder="What is happening?!"
                value={text}
+               ref={textareaRef}
+               onClick={addAnimation}
                onChange={(e) => setText(e.target.value)}
             />
             {/* name of each tab group should be unique */}
-            <div role="alert" className="alert bg-transparent text-gray-600 border-gray-300 flex flex-col gap-2 items-start">
+            <div ref={categoryRef} role="alert" className="alert bg-transparent text-gray-600 border-gray-300 flex flex-col gap-2 items-start hidden">
                <div className=" flex justify-start gap-2">
                   <svg
                      xmlns="http://www.w3.org/2000/svg"
@@ -122,7 +184,9 @@ const CreatePost = () => {
                   <span>Select Category for your post</span>
                </div>
 
-               <div className="tabs tabs-box flex justify-evenly bg-[#ffffff] text-black ">
+               <div
+
+                  className="customAnimation tabs tabs-box flex justify-evenly bg-[#ffffff] text-black ">
                   <input
                      type="radio"
                      name="category"

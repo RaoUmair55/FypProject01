@@ -7,9 +7,7 @@ import { pipeline } from "@xenova/transformers";
 
 export const createPost = async (req, res) => {
     try {
-        //   console.log('Received text:', req.body.text);
-        // console.log('Received file:', req.file); // Check the file uploaded (if any)
-
+      
         const text = req.body.text;
         const category = req.body.category;
         const localFilePath = req.file?.path;
@@ -30,7 +28,7 @@ export const createPost = async (req, res) => {
 
         // Sentiment check when the text is not empty
         const analyse = async (text) => {
-            const pipe = await pipeline('sentiment-analysis')
+            const pipe = await pipeline('sentiment-analysis' )
             const sentiment = await pipe(text)
 
             return sentiment

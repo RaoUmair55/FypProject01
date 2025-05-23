@@ -9,7 +9,7 @@ const postSchema = new mongoose.Schema(
     },
     category: {
       type: String,
-      enum: ["Anouncement", "Department", "Events", "Other"],
+      enum: ["Announcement", "Department", "Events", "Other"],
       required: true,
       default: "Other",
     },
