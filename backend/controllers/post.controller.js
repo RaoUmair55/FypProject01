@@ -53,7 +53,7 @@ export const createPost = async (req, res) => {
         await post.save();
         // await notification.save();
         console.log(`Sentiment: ${analyse(text)}`)
-        constsentiment = analyse(text)
+        const sentiment = analyse(text)
         return res.status(201).json({ message: "Post created successfully", post, sentiment: sentiment });
 
     } catch (error) {
