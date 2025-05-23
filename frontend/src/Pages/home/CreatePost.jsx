@@ -114,18 +114,18 @@ const CreatePost = () => {
 								<span>Select Category for your post</span>
 							 </div>
 
-            <div className="tabs tabs-box flex justify-evenly bg-[#ffffff] ">
+            <div className="tabs tabs-box flex justify-evenly bg-[#ffffff] text-black ">
                <input
                   type="radio"
                   name="category"
-                  className="tab [--tab-bg:#ecf1fc] checked:text-black"
+                  className="tab [--tab-bg:#ecf1fc] checked:text-black text-black"
                   aria-label="Department"
                   defaultChecked
                />
                <input
                   type="radio"
                   name="category"
-                  className="tab [--tab-bg:#ecf1fc] checked:text-black"
+                  className="tab [--tab-bg:#ecf1fc] checked:text-black text-black"
                   aria-label="Announcement"
                   onChange={() => setCategory("Announcement")}
                />
@@ -145,6 +145,10 @@ const CreatePost = () => {
                />
             </div>
             </div>
+            <span className="text-gray-500 flex gap-3 items-center">Post as anonymously
+               <input type="checkbox" defaultChecked className="toggle bg-black checked:bg-[#1a8cd8] " />
+            </span>
+            
             {img && (
                <div className="relative w-72 mx-auto">
                   <IoCloseSharp
@@ -169,16 +173,19 @@ const CreatePost = () => {
                   />
                   <BsEmojiSmileFill className="fill-[#153a54] w-5 h-5 cursor-pointer" />
                </div>
-               <input
-                  type="file"
-                  accept="image/*"
-                  hidden
-                  ref={imgRef}
-                  onChange={handleImgChange}
-               />
-               <button className="btn  bg-[#1d9bf0] text-white rounded-full btn-sm hover:bg-[#1a8cd8] px-4">
-                  {isPending ? "Posting..." : "Post"}
-               </button>
+               <div className=" flex gap-2 items-center">
+                  <input
+                     type="file"
+                     accept="image/*"
+                     hidden
+                     ref={imgRef}
+                     onChange={handleImgChange}
+                  />
+                  
+                  <button className="btn  bg-[#1d9bf0] text-white rounded-full btn-sm hover:bg-[#1a8cd8] px-4">
+                     {isPending ? "Posting..." : "Post"}
+                  </button>
+               </div>
             </div>
             {isError && <div className="text-red-500">{error.message}</div>}
          </form>

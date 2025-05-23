@@ -2,6 +2,7 @@ import User from "../models/user.model.js";
 import Notification from "../models/notification.model.js";
 import Post from "../models/post.model.js";
 import { uploadOnCloudinary } from "../utills/uploadCloudinary.js";
+import { pipeline } from "@xenova/transformers";
 
 
 export const createPost = async (req, res) => {
@@ -25,6 +26,15 @@ export const createPost = async (req, res) => {
             console.log('Text or category is missing');
             return res.status(400).json({ error: "Text and category are required" });
         }
+
+        // Sentiment check when the text is not empty
+        const analyse = async (text) => {
+            const pipe = await pipeline('sentiment-analysis')
+            const sentiment = await pipe(text)
+            console.log(sentiment)
+            return sentiment
+        }
+
         const userId = req.user._id; // Assuming you have the user ID in req.user
         const user = await User.findById(userId);
         if (!user) {
@@ -42,7 +52,9 @@ export const createPost = async (req, res) => {
 
         await post.save();
         // await notification.save();
-        return res.status(201).json({ message: "Post created successfully", post });
+        // console.log(`Sentiment: ${analyse(text)}`)
+        const sentiment = await analyse(text)
+        return res.status(201).json({ message: "Post created successfully", post, sentiment: sentiment });
 
     } catch (error) {
         console.error(error);
@@ -311,3 +323,32 @@ export const getPostsByCategory = async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 };
+
+
+/*
+// sentiment analysist
+import express from 'express';
+import {pipeline} from "@xenova/transformers";      // pipeline is a fnx that allows us to do the processing
+
+const app = express();
+const port = process.env.PORT || 5000
+
+app.use(express.json());        // middleware to process json data
+const pipe = await pipeline('sentiment-analysis');
+
+app.get('/', (req, res) => {
+    res.send("JOEE")
+})
+
+app.post('/', async (req, res) => {
+    const result = await(pipe(req.body.text))
+    res.json(result)
+})
+
+// console.log(await pipe("u suck"))
+
+app.listen(port, () => {
+    console.log(`server listening on http://localhost:${port}`)
+})
+
+*/

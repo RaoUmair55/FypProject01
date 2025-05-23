@@ -35,6 +35,37 @@ const HomePage = () => {
 
 				{/*  CREATE POST INPUT */}
 				<CreatePost />
+				{/* name of each tab group should be unique */}
+				<div className="tabs tabs-box flex justify-evenly bg-[#ffffff] ">
+               <input
+                  type="radio"
+                  name="category"
+                  className="tab [--tab-bg:#ecf1fc] checked:rounded-full  checked:text-black"
+                  aria-label="Department"
+                  defaultChecked
+               />
+               <input
+                  type="radio"
+                  name="category"
+                  className="tab [--tab-bg:#ecf1fc] checked:rounded-full checked:text-black"
+                  aria-label="Announcement"
+                  onChange={() => setCategory("Announcement")}
+               />
+               <input
+                  type="radio"
+                  name="category"
+                  className="tab [--tab-bg:#ecf1fc] checked:rounded-full checked:text-black"
+                  aria-label="Events"
+                  onChange={() => setCategory("Events")}
+               />
+               <input
+                  type="radio"
+                  name="category"
+                  className="tab [--tab-bg:#ecf1fc] checked:rounded-full checked:text-black"
+                  aria-label="Other"
+                  onChange={() => setCategory("Other")}
+               />
+            </div>
 
 				{/* POSTS */}
 				<Posts feedType={feedType} />

@@ -5,7 +5,7 @@
 
 .card{
   @apply hover:shadow-[#153a54] shadow-lg;
-   @apply hover:scale-105;
+  @apply hover:scale-105;
   @apply transition-all;
   @apply duration-300;
   @apply ease-in-out;
@@ -21,8 +21,7 @@ input::placeholder{
   color: #f8f9fd;
 }
 
-input
-{
+.tab{
   color: black;
 }
 
