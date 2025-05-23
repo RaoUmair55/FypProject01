@@ -44,10 +44,9 @@ const { data: notificationCountData, isLoading: isCountLoading } = useQuery({
   queryFn: async () => {
     const res = await fetch("/api/notifications/number", {
       method: "GET",
-      credentials: "include", // ✅ This sends cookies with the request
-      headers: {
-        "Content-Type": "application/json",
-      },
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //   },
     });
 
     if (!res.ok) {

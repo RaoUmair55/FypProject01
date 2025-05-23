@@ -7,9 +7,7 @@ import { pipeline } from "@xenova/transformers";
 
 export const createPost = async (req, res) => {
     try {
-        //   console.log('Received text:', req.body.text);
-        // console.log('Received file:', req.file); // Check the file uploaded (if any)
-
+      
         const text = req.body.text;
         const category = req.body.category;
         const localFilePath = req.file?.path;

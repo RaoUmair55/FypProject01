@@ -7,6 +7,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast"
+import { anonymous } from "../../utils/anonymous";
 
 import LoadingSpinner from "./LoadingSpinner"
 import LoadingRing from "./LoadingRing"
@@ -16,6 +17,7 @@ const Post = ({ post }) => {
 	const [comment, setComment] = useState("");
 	const queryClient = useQueryClient();
 	const authUser = queryClient.getQueryData(["authUser"]);
+	const Anonymous = post.isAnonymous;
 
 	const postOwner = post.user;
 	const isLiked = post.likes.includes(authUser._id)
@@ -145,7 +147,7 @@ const { mutate: likePost, isPending: isLiking } = useMutation({
 				<div className='flex flex-col flex-1 '>
 					<div className='flex gap-2 items-center text-[#153a54]'>
 						<Link to={`/profile/${postOwner._id}`} className='font-bold'>
-							Anonymous****
+							{Anonymous ? anonymous : postOwner.fullName}
 						</Link>
 						<span className='text-gray-700 flex gap-1 text-sm '>
 							<Link to={`/profile/${postOwner.username}`}>@{postOwner.university}</Link>
