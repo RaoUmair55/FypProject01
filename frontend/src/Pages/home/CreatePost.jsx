@@ -55,10 +55,17 @@ const CreatePost = () => {
          }
       },
       onSuccess: () => {
+         console.log(data)
          setText("");
          setImg(null);
          toast.success("Post created !");
          queryClient.invalidateQueries({ queryKey: ["posts"] });
+
+         if (data.sentiment === "NEGATIVE") {
+            alert("Your post seems to have a negative sentiment. Please reconsider the tone.");
+         } else {
+            toast.success("Post created!");
+         }
       },
    });
 
@@ -97,59 +104,59 @@ const CreatePost = () => {
                onChange={(e) => setText(e.target.value)}
             />
             {/* name of each tab group should be unique */}
-            <div role="alert" className="alert bg-transparent text-gray-600 border-gray-300 flex flex-col gap-2 items-start"> 
-							<div className=" flex justify-start gap-2">
-								<svg
-										xmlns="http://www.w3.org/2000/svg"
-										fill="none"
-										viewBox="0 0 24 24"
-										className="stroke-info h-6 w-6 shrink-0"
-								>
-										<path
-											strokeLinecap="round"
-											strokeLinejoin="round"
-											strokeWidth="2"
-											d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-										></path>
-								</svg>
-								<span>Select Category for your post</span>
-							 </div>
+            <div role="alert" className="alert bg-transparent text-gray-600 border-gray-300 flex flex-col gap-2 items-start">
+               <div className=" flex justify-start gap-2">
+                  <svg
+                     xmlns="http://www.w3.org/2000/svg"
+                     fill="none"
+                     viewBox="0 0 24 24"
+                     className="stroke-info h-6 w-6 shrink-0"
+                  >
+                     <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                     ></path>
+                  </svg>
+                  <span>Select Category for your post</span>
+               </div>
 
-            <div className="tabs tabs-box flex justify-evenly bg-[#ffffff] text-black ">
-               <input
-                  type="radio"
-                  name="category"
-                  className="tab [--tab-bg:#ecf1fc] checked:text-black text-black"
-                  aria-label="Department"
-                  defaultChecked
-               />
-               <input
-                  type="radio"
-                  name="category"
-                  className="tab [--tab-bg:#ecf1fc] checked:text-black text-black"
-                  aria-label="Announcement"
-                  onChange={() => setCategory("Announcement")}
-               />
-               <input
-                  type="radio"
-                  name="category"
-                  className="tab [--tab-bg:#ecf1fc] checked:text-black"
-                  aria-label="Events"
-                  onChange={() => setCategory("Events")}
-               />
-               <input
-                  type="radio"
-                  name="category"
-                  className="tab [--tab-bg:#ecf1fc] checked:text-black"
-                  aria-label="Other"
-                  onChange={() => setCategory("Other")}
-               />
-            </div>
+               <div className="tabs tabs-box flex justify-evenly bg-[#ffffff] text-black ">
+                  <input
+                     type="radio"
+                     name="category"
+                     className="tab [--tab-bg:#ecf1fc] checked:text-black text-black"
+                     aria-label="Department"
+                     defaultChecked
+                  />
+                  <input
+                     type="radio"
+                     name="category"
+                     className="tab [--tab-bg:#ecf1fc] checked:text-black text-black"
+                     aria-label="Announcement"
+                     onChange={() => setCategory("Announcement")}
+                  />
+                  <input
+                     type="radio"
+                     name="category"
+                     className="tab [--tab-bg:#ecf1fc] checked:text-black"
+                     aria-label="Events"
+                     onChange={() => setCategory("Events")}
+                  />
+                  <input
+                     type="radio"
+                     name="category"
+                     className="tab [--tab-bg:#ecf1fc] checked:text-black"
+                     aria-label="Other"
+                     onChange={() => setCategory("Other")}
+                  />
+               </div>
             </div>
             <span className="text-gray-500 flex gap-3 items-center">Post anonymously
                <input type="checkbox" checked={isAnonymous} className="toggle bg-black checked:bg-[#1a8cd8] " onChange={() => setIsAnonymous(!isAnonymous)} />
             </span>
-            
+
             {img && (
                <div className="relative w-72 mx-auto">
                   <IoCloseSharp
@@ -182,7 +189,7 @@ const CreatePost = () => {
                      ref={imgRef}
                      onChange={handleImgChange}
                   />
-                  
+
                   <button className="btn  bg-[#1d9bf0] text-white rounded-full btn-sm hover:bg-[#1a8cd8] px-4">
                      {isPending ? "Posting..." : "Post"}
                   </button>
