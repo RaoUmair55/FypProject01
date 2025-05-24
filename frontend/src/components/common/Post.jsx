@@ -1,4 +1,4 @@
-	import { FaRegComment } from "react-icons/fa";
+import { FaRegComment } from "react-icons/fa";
 import { BiRepost } from "react-icons/bi";
 import { FaRegHeart } from "react-icons/fa";
 import { FaRegBookmark } from "react-icons/fa6";
@@ -26,7 +26,7 @@ const Post = ({ post }) => {
 
 	const formattedDate = formatPostDate(post.createdAt);
 
-	const {mutate:deletePost, isPending:isDeleting} = useMutation({
+	const { mutate: deletePost, isPending: isDeleting } = useMutation({
 		mutationFn: async () => {
 			try {
 				const res = await fetch(`/api/posts/${post._id}`, {
@@ -46,48 +46,48 @@ const Post = ({ post }) => {
 			toast.success("Post deleted")
 
 			// invalidate the query to fetch the post
-			queryClient.invalidateQueries({queryKey: ["posts"]})
+			queryClient.invalidateQueries({ queryKey: ["posts"] })
 		}
 	})
 
-const { mutate: likePost, isPending: isLiking } = useMutation({
-	mutationFn: async () => {
-		try {
-			const res = await fetch(`/api/posts/like/${post._id}`, {
-				method: "POST",
+	const { mutate: likePost, isPending: isLiking } = useMutation({
+		mutationFn: async () => {
+			try {
+				const res = await fetch(`/api/posts/like/${post._id}`, {
+					method: "POST",
+				});
+				const data = await res.json();
+
+				if (!res.ok) {
+					throw new Error(data.error || "Something went wrong");
+				}
+				return data; // assuming it's the updated post
+			} catch (error) {
+				throw new Error(error?.message || "Something went wrong");
+			}
+		},
+		onSuccess: (updatedPost) => {
+			toast.success("Post liked successfully");
+
+			queryClient.setQueryData(["posts"], (oldPosts) => {
+				if (!Array.isArray(oldPosts)) return oldPosts;
+
+				return oldPosts.map((p) => {
+					if (p._id === updatedPost._id) {
+						return updatedPost; // ✅ replace entire post
+					}
+					return p;
+				});
 			});
-			const data = await res.json();
+			queryClient.invalidateQueries({ queryKey: ["posts"] });
+		},
 
-			if (!res.ok) {
-				throw new Error(data.error || "Something went wrong");
-			}
-			return data; // assuming it's the updated post
-		} catch (error) {
-			throw new Error(error?.message || "Something went wrong");
+		onError: (error) => {
+			toast.error(error.message);
 		}
-	},
-	onSuccess: (updatedPost) => {
-  toast.success("Post liked successfully");
-  
-  queryClient.setQueryData(["posts"], (oldPosts) => {
-	  if (!Array.isArray(oldPosts)) return oldPosts;
-	  
-	  return oldPosts.map((p) => {
-		  if (p._id === updatedPost._id) {
-			  return updatedPost; // ✅ replace entire post
-			}
-			return p;
-		});
 	});
-	queryClient.invalidateQueries({ queryKey: ["posts"] });
-},
 
-	onError: (error) => {
-		toast.error(error.message);
-	}
-});
-
-	const {mutate: commentPost, isPending:isCommenting} = useMutation({
+	const { mutate: commentPost, isPending: isCommenting } = useMutation({
 		mutationFn: async () => {
 			try {
 				const res = await fetch(`/api/posts/comment/${post._id}`, {
@@ -95,13 +95,13 @@ const { mutate: likePost, isPending: isLiking } = useMutation({
 					headers: {
 						"Content-Type": "application/json",
 					},
-					body:JSON.stringify({text: comment}),
+					body: JSON.stringify({ text: comment }),
 				});
 
 				const data = await res.json();
 
 				if (!res.ok) {
-					throw new Error(data.error || "Something went wrong"); 
+					throw new Error(data.error || "Something went wrong");
 				}
 				return data;
 			} catch (error) {
@@ -111,7 +111,7 @@ const { mutate: likePost, isPending: isLiking } = useMutation({
 		onSuccess: () => {
 			toast.success("Commented on the Buzz successfully");
 			setComment("");		// reset the state
-			queryClient.invalidateQueries({queryKey: ["posts"]});
+			queryClient.invalidateQueries({ queryKey: ["posts"] });
 		},
 		onError: (error) => {
 			toast.error(error.message);
@@ -132,25 +132,45 @@ const { mutate: likePost, isPending: isLiking } = useMutation({
 	};
 
 	const handleLikePost = () => {
-		if (isLiking) return;	
-		likePost();	
+		if (isLiking) return;
+		likePost();
 	};
 
 	return (
 		<>
 			<div className='flex gap-2 items-start p-4 border-2 border-[#dce1e7] my-4 rounded-2xl bg-white'>
 				<div className='avatar'>
-					<Link to={`/profile/${postOwner.username}`} className='w-8 rounded-full overflow-hidden '>
-						<img src={postOwner.profileImg || "/avatar-placeholder.png"} />
-					</Link>
+					{post.isAnonymous ? (
+						<div
+							className='w-8 rounded-full overflow-hidden cursor-pointer'
+							onClick={() => {
+								toast.error("This post is anonymous. You can't view the profile.");
+							}}
+						>
+							<img src={postOwner.profileImg || "/avatar-placeholder.png"} alt="Anonymous Avatar" />
+						</div>
+					) : (
+						<Link
+							to={`/profile/${postOwner._id}`}
+							className='w-8 rounded-full overflow-hidden'
+						>
+							<img src={postOwner.profileImg || "/avatar-placeholder.png"} alt="User Avatar" />
+						</Link>
+					)}
 				</div>
+
 				<div className='flex flex-col flex-1 '>
 					<div className='flex gap-2 items-center text-[#153a54]'>
-						<Link to={`/profile/${postOwner._id}`} className='font-bold'>
-							{Anonymous ? anonymous : postOwner.fullName}
-						</Link>
+						{Anonymous ? (
+							<span className='font-bold cursor-default'>{anonymous}</span>
+						) : (
+							<Link to={`/profile/${postOwner._id}`} className='font-bold'>
+								{postOwner.fullName}
+							</Link>
+						)}
+
 						<span className='text-gray-700 flex gap-1 text-sm '>
-							<Link to={`/profile/${postOwner.username}`}>@{postOwner.university}</Link>
+							<Link >@{postOwner.university}</Link>
 							<span>·</span>
 							<span>{formattedDate}</span>
 						</span>
@@ -228,7 +248,7 @@ const { mutate: likePost, isPending: isLiking } = useMutation({
 										/>
 										<button className='btn btn-primary rounded-full btn-sm text-white px-4'>
 											{isCommenting ? (
-												<LoadingRing size="md"/>
+												<LoadingRing size="md" />
 											) : (
 												"Post"
 											)}
@@ -251,9 +271,8 @@ const { mutate: likePost, isPending: isLiking } = useMutation({
 								{isLiked && !isLiking && <FaRegHeart className='w-4 h-4 cursor-pointer text-pink-500 ' />}
 
 								<span
-									className={`text-sm  group-hover:text-pink-500 ${
-										isLiked ? "text-pink-500" : "text-slate-500"
-									}`}
+									className={`text-sm  group-hover:text-pink-500 ${isLiked ? "text-pink-500" : "text-slate-500"
+										}`}
 								>
 									{post.likes.length}
 

@@ -290,14 +290,14 @@ export const getUserPosts = async (req, res) => {
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
-
-    const posts = await Post.find({ user: user._id })
+//where isAnonymous is false
+    const posts = await Post.find({ user: user._id, isAnonymous: false })
       .populate("user", "username fullName university")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
 
-    const totalPosts = await Post.countDocuments({ user: user._id });
+    const totalPosts = await Post.countDocuments({ user: user._id, isAnonymous: false });
 
     return res.status(200).json({ posts, total: totalPosts });
   } catch (error) {

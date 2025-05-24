@@ -216,10 +216,10 @@ const CreatePost = () => {
                      onChange={() => setCategory("Other")}
                   />
                </div>
-            </div>
             <span className="text-gray-500 flex gap-3 items-center">Post anonymously
                <input type="checkbox" checked={isAnonymous} className="toggle bg-black checked:bg-[#1a8cd8] " onChange={() => setIsAnonymous(!isAnonymous)} />
             </span>
+            </div>
 
             {img && (
                <div className="relative w-72 mx-auto">
