@@ -57,7 +57,7 @@ const { data: notificationCountData, isLoading: isCountLoading } = useQuery({
     const data = await res.json();
     return data; // { number: X }
   },
-  refetchInterval: 100,
+  refetchInterval: 10000,
 });
 
 const notificationCount = notificationCountData?.number || 1;
