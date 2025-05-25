@@ -246,32 +246,43 @@ export const likedPost = async (req, res) => {
 
 
 export const getFollowedPosts = async (req, res) => {
-    try {
-        const userId = req.user._id; // Assuming you have the user ID in req.user
-        const user = await User.findById(userId)
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 15;
+  const skip = (page - 1) * limit;
 
-        if (!user) {
-            return res.status(404).json({ error: "User not found" });
-        }
+  try {
+    const userId = req.user._id;
 
-       const following = user.following; // Array of user IDs that the current user is following
-
-       const feedPosts = await Post.find({ user: { $in: following } })
-       .sort({ createdAt: -1 })
-       .populate({
-           path: "user",
-           select: "-password -bio -followers -following -link"
-       }).populate({
-        
-           path: "comments.user",
-           select: "-password -bio -followers -following -link"
-       });
-       return res.status(200).json(feedPosts);
-    } catch (error) {
-        console.error("Error in get followed posts controller",error);
-        res.status(500).json({ error: "Server error" });
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
     }
-}
+
+    const following = user.following;
+
+    // Only non-anonymous posts from followed users
+    const posts = await Post.find({ user: { $in: following }, isAnonymous: false })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .populate({
+        path: "user",
+        select: "username fullName university"
+      })
+      .populate({
+        path: "comments.user",
+        select: "username fullName university"
+      });
+
+    const total = await Post.countDocuments({ user: { $in: following }, isAnonymous: false });
+
+    return res.status(200).json({ posts, total });
+  } catch (error) {
+    console.error("Error in getFollowedPosts controller", error);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
    
 export const getUserPosts = async (req, res) => {
   const page = parseInt(req.query.page) || 1;
