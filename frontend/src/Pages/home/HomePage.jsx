@@ -2,9 +2,16 @@ import { useState } from "react";
 
 import Posts from "../../components/common/Posts";
 import CreatePost from "./CreatePost";
+import { hanning } from "@xenova/transformers";
 
 const HomePage = () => {
-	const [feedType, setFeedType] = useState("forYou") ;
+	const [feedType, setFeedType] = useState("forYou");
+	const [categorytype, setCategorytype] = useState("Announcement");
+	const handleChangeCategory = (e) => {
+		setFeedType("category");
+		setCategorytype(e.target.value);
+	};
+
 
 	return (
 		<>
@@ -37,38 +44,44 @@ const HomePage = () => {
 				<CreatePost />
 				{/* name of each tab group should be unique */}
 				<div className="tabs tabs-box flex justify-evenly bg-[#ffffff] ">
-               <input
-                  type="radio"
-                  name="category"
-                  className="tab [--tab-bg:#ecf1fc] checked:rounded-full  checked:text-black"
-                  aria-label="Department"
-                  defaultChecked
-               />
-               <input
-                  type="radio"
-                  name="category"
-                  className="tab [--tab-bg:#ecf1fc] checked:rounded-full checked:text-black"
-                  aria-label="Announcement"
-                  onChange={() => setCategory("Announcement")}
-               />
-               <input
-                  type="radio"
-                  name="category"
-                  className="tab [--tab-bg:#ecf1fc] checked:rounded-full checked:text-black"
-                  aria-label="Events"
-                  onChange={() => setCategory("Events")}
-               />
-               <input
-                  type="radio"
-                  name="category"
-                  className="tab [--tab-bg:#ecf1fc] checked:rounded-full checked:text-black"
-                  aria-label="Other"
-                  onChange={() => setCategory("Other")}
-               />
-            </div>
+					<input
+						type="radio"
+						name="category"
+						className="tab [--tab-bg:#ecf1fc] checked:rounded-full checked:text-black"
+						aria-label="Department"
+						value="Department"
+						defaultChecked
+						onChange={handleChangeCategory}
+					/>
+					<input
+						type="radio"
+						name="category"
+						className="tab [--tab-bg:#ecf1fc] checked:rounded-full checked:text-black"
+						aria-label="Announcement"
+						value="Announcement"
+						onChange={handleChangeCategory}
+					/>
+					<input
+						type="radio"
+						name="category"
+						className="tab [--tab-bg:#ecf1fc] checked:rounded-full checked:text-black"
+						aria-label="Events"
+						value="Events"
+						onChange={handleChangeCategory}
+					/>
+					<input
+						type="radio"
+						name="category"
+						className="tab [--tab-bg:#ecf1fc] checked:rounded-full checked:text-black"
+						aria-label="Other"
+						value="Other"
+						onChange={handleChangeCategory}
+					/>
+				</div>
+
 
 				{/* POSTS */}
-				<Posts feedType={feedType} />
+				<Posts feedType={feedType} category={categorytype} />
 			</div>
 		</>
 	);

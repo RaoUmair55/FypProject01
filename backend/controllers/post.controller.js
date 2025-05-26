@@ -339,10 +339,13 @@ export const getUserPosts = async (req, res) => {
 
 export const getPostsByCategory = async (req, res) => {
   try {
-    const { category } = req.params;
-    const allowedCategories = ["Anouncement", "Department", "Events", "Other"];
+    const { categorytype } = req.params;
+    if (!categorytype) {
+      return res.status(400).json({ error: "Category type is required" });
+    }
+const allowedCategories = ["Announcement", "Department", "Events", "Other"];
 
-    if (!allowedCategories.includes(category)) {
+    if (!allowedCategories.includes(categorytype)) {
       return res.status(400).json({ error: "Invalid category" });
     }
 
@@ -350,9 +353,9 @@ export const getPostsByCategory = async (req, res) => {
     const limit = parseInt(req.query.limit) || 15;
     const skip = (page - 1) * limit;
 
-    const total = await Post.countDocuments({ category });
+    const total = await Post.countDocuments({ category: categorytype });
 
-    const posts = await Post.find({ category })
+    const posts = await Post.find({ category: categorytype, isAnonymous: false })
       .populate("user", "username fullName university")
       .sort({ createdAt: -1 })
       .skip(skip)

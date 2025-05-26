@@ -4,9 +4,8 @@ import Post from "./Post";
 import PostSkeleton from "../skeletons/PostSkeleton";
 import { useEffect } from "react";
 
-const Posts = ({ feedType, username, userId }) => {
+const Posts = ({ feedType, username, userId, category }) => {
   const { ref, inView } = useInView();
-
   const getPostEndPoint = () => {
     switch (feedType) {
       case "forYou":
@@ -17,6 +16,8 @@ const Posts = ({ feedType, username, userId }) => {
         return username ? `/api/posts/userPosts/${username}` : null;
       case "likes":
         return userId ? `/api/posts/getlikedPost/${userId}` : null;
+      case "category":
+        return category ? `/api/posts/category/${category}` : null;
       default:
         return "/api/posts/all";
     }
@@ -33,7 +34,7 @@ const Posts = ({ feedType, username, userId }) => {
     isError,
     error,
   } = useInfiniteQuery({
-    queryKey: ["posts", feedType, username, userId],
+    queryKey: ["posts", feedType, username, userId, category],
     queryFn: async ({ pageParam = 1 }) => {
       if (!POST_ENDPOINT) {
         throw new Error("Invalid endpoint. Missing username or userId.");
@@ -68,8 +69,8 @@ const Posts = ({ feedType, username, userId }) => {
 
   const posts = Array.isArray(data?.pages)
     ? data.pages.flatMap((page) =>
-        Array.isArray(page?.posts) ? page.posts : []
-      )
+      Array.isArray(page?.posts) ? page.posts : []
+    )
     : [];
 
   return (
