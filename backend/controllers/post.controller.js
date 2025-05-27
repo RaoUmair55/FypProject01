@@ -4,6 +4,9 @@ import Post from "../models/post.model.js";
 import { uploadOnCloudinary } from "../utills/uploadCloudinary.js";
 import { pipeline } from "@xenova/transformers";
 import { GoogleGenAI } from '@google/genai';
+import dotenv from "dotenv"
+
+dotenv.config()
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
@@ -33,31 +36,34 @@ export const createPost = async (req, res) => {
     const text = req.body.text;
     const category = req.body.category;
     const localFilePath = req.file?.path;
-    const isAnonymous = req.body.isAnonymous || false;
+    const isAnonymous = req.body.isAnonymous;
 
-const pipe = await pipeline('sentiment-analysis', 'Xenova/distilbert-base-uncased-finetuned-sst-2-english');
-
+    
     if (!text || !category) {
       return res.status(400).json({ error: "Text and category are required" });
     }
+    
+    if (isAnonymous === "true") {
+      // Translate text from Roman Urdu to English
+      const pipe = await pipeline('sentiment-analysis', 'Xenova/distilbert-base-uncased-finetuned-sst-2-english');
+      
+      const translatedText = await main(text);
+      console.log("Translated Text:", translatedText);
 
-    // Translate text from Roman Urdu to English
-    const translatedText = await main(text);
-    console.log("Translated Text:", translatedText);
+      if (!translatedText) {
+        return res.status(400).json({ error: "Translation failed or returned empty result." });
+      }
 
-    if (!translatedText) {
-      return res.status(400).json({ error: "Translation failed or returned empty result." });
+      // Analyze sentiment
+      const sentiment = await pipe(translatedText);
+      const label = sentiment[0].label;
+
+      if (label === 'NEGATIVE') {
+        return res.status(400).json({
+          error: "⚠️ Your post contains negative sentiment. Consider rephrasing."
+        });
+      }
     }
-
-    // Analyze sentiment
-    const sentiment = await pipe(translatedText);
-const label = sentiment[0].label;
-
-if (label === 'NEGATIVE') {
-  return res.status(400).json({
-    error: "⚠️ Your post contains negative sentiment. Consider rephrasing."
-  });
-}
 
     let imageUrl = '';
     if (localFilePath) {
@@ -343,7 +349,7 @@ export const getPostsByCategory = async (req, res) => {
     if (!categorytype) {
       return res.status(400).json({ error: "Category type is required" });
     }
-const allowedCategories = ["Announcement", "Department", "Events", "Other"];
+    const allowedCategories = ["Announcement", "Department", "Events", "Other"];
 
     if (!allowedCategories.includes(categorytype)) {
       return res.status(400).json({ error: "Invalid category" });
