@@ -145,8 +145,8 @@ const CreatePost = () => {
                />
             </div>
             </div>
-            <span className="text-gray-500 flex gap-3 items-center">Post as anonymously
-               <input type="checkbox" defaultChecked className="toggle bg-black checked:bg-[#1a8cd8] " />
+            <span className="text-gray-500 flex gap-3 items-center">Post anonymously
+               <input type="checkbox" className="toggle bg-black checked:bg-[#1a8cd8] " />
             </span>
             
             {img && (

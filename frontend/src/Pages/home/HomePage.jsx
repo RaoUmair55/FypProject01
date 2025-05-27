@@ -36,36 +36,55 @@ const HomePage = () => {
 				{/*  CREATE POST INPUT */}
 				<CreatePost />
 				{/* name of each tab group should be unique */}
-				<div className="tabs tabs-box flex justify-evenly bg-[#ffffff] ">
-               <input
-                  type="radio"
-                  name="category"
-                  className="tab [--tab-bg:#ecf1fc] checked:rounded-full  checked:text-black"
-                  aria-label="Department"
-                  defaultChecked
-               />
-               <input
-                  type="radio"
-                  name="category"
-                  className="tab [--tab-bg:#ecf1fc] checked:rounded-full checked:text-black"
-                  aria-label="Announcement"
-                  onChange={() => setCategory("Announcement")}
-               />
-               <input
-                  type="radio"
-                  name="category"
-                  className="tab [--tab-bg:#ecf1fc] checked:rounded-full checked:text-black"
-                  aria-label="Events"
-                  onChange={() => setCategory("Events")}
-               />
-               <input
-                  type="radio"
-                  name="category"
-                  className="tab [--tab-bg:#ecf1fc] checked:rounded-full checked:text-black"
-                  aria-label="Other"
-                  onChange={() => setCategory("Other")}
-               />
-            </div>
+				
+							<div className='flex w-full border border-gray-300 rounded-full bg-white mt-4'>
+								<div
+									className='flex justify-center text-[#153a54] flex-1 p-3 transition duration-300 relative cursor-pointer'
+									onClick={() => setFeedType("foryou")}
+								>
+									All Post
+									{feedType === "foryou" && (
+										<div className='absolute bottom-0 w-10 h-1 rounded-full bg-primary' />
+									)}
+								</div>
+								<div
+									className='flex justify-center flex-1 p-3 text-slate-500 transition duration-300 relative cursor-pointer'
+									onClick={() => setFeedType("department")}
+								>
+									Department
+									{feedType === "department" && (
+										<div className='absolute bottom-0 w-10  h-1 rounded-full bg-primary' />
+									)}
+								</div>
+								<div
+									className='flex justify-center flex-1 p-3 text-slate-500 transition duration-300 relative cursor-pointer'
+									onClick={() => setFeedType("opportunity")}
+								>
+									Opportunity
+									{feedType === "opportunity" && (
+										<div className='absolute bottom-0 w-10  h-1 rounded-full bg-primary' />
+									)}
+								</div>
+								<div
+									className='flex justify-center flex-1 p-3 text-slate-500 transition duration-300 relative cursor-pointer'
+									onClick={() => setFeedType("events")}
+								>
+									Events
+									{feedType === "events" && (
+										<div className='absolute bottom-0 w-10  h-1 rounded-full bg-primary' />
+									)}
+								</div>
+								<div
+									className='flex justify-center flex-1 p-3 text-slate-500 transition duration-300 relative cursor-pointer'
+									onClick={() => setFeedType("other")}
+								>
+									Other
+									{feedType === "other" && (
+										<div className='absolute bottom-0 w-10  h-1 rounded-full bg-primary' />
+									)}
+								</div>
+							</div>
+
 
 				{/* POSTS */}
 				<Posts feedType={feedType} />
