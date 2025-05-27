@@ -9,7 +9,7 @@ const postSchema = new mongoose.Schema(
     },
     category: {
       type: String,
-      enum: ["Anouncement", "Department", "Events", "Other"],
+      enum: ["Announcement", "Department", "Events", "Other"],
       required: true,
       default: "Other",
     },
@@ -24,6 +24,10 @@ const postSchema = new mongoose.Schema(
     university: {
       type: String,
       required: true,
+    },
+    isAnonymous: {
+      type: Boolean,
+      default: false,
     },
     likes: [
       {
