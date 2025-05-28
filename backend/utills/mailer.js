@@ -14,7 +14,7 @@ const sendOTP = async (email, otp) => {
     to: email,
     subject: "Verify your OTP",
     text: `Your OTP is: ${otp}`,
-    html: `<b>Your OTP is: ${otp}</b>`,
+    html: `Your OTP is: <b>${otp}</b>`,
   });
 
   console.log("Message sent:", info.messageId);
