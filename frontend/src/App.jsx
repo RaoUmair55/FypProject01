@@ -8,6 +8,7 @@ import { Toaster } from 'react-hot-toast';
 import { useQuery } from '@tanstack/react-query';
 import LoadingSpinner from './components/common/LoadingSpinner';
 import CoolLoader from './utils/loader';
+import ForgetPassword from './Pages/auth/forgetPassword/ForgetPassword';
 // Lazy-loaded pages
 const HomePage = lazy(() => import('./Pages/home/HomePage'));
 const LoginPage = lazy(() => import('./Pages/auth/login/LoginPage'));
@@ -55,6 +56,7 @@ function App() {
           <Route path="/verify" element={!authUser ? <VerifyOTPPage /> : <Navigate to="/" />} />
           <Route path="/notifications" element={authUser ? <NotificationPage /> : <Navigate to="/login" />} />
           <Route path="/profile/:id" element={authUser ? <ProfilePage /> : <Navigate to="/login" />} />
+          <Route path="/forgetPassword" element={<ForgetPassword />} />
         </Routes>
       </Suspense>
       

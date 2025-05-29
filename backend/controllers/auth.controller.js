@@ -1,8 +1,9 @@
-import  {getUniversityFromEmail}  from "../utills/universityUtills.js";
+import { getUniversityFromEmail } from "../utills/universityUtills.js";
 import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import { generateTokenAndSetCookie } from "../utills/generateTokenAndSetCookie.js";
-import  sendOTP  from "../utills/mailer.js";
+import sendOTP from "../utills/mailer.js";
+import { generateOtp } from "../utills/generateOtp.js";
 
 export const signup = async (req, res) => {
     try {
@@ -60,6 +61,33 @@ export const signup = async (req, res) => {
     }
 };
 
+export const forgetPassword = async (req, res) => {
+    const { email } = req.body;
+
+    if (!email) {
+        return res.status(400).json({ error: "Email is required" });
+    }
+
+    // check if a user exists with this email
+    const user = await User.findOne( {email} )
+    if (!user) {
+        return res.status(400).json({error: "User not found"})
+    }
+
+    // generate an OTP and set it in DB
+    const {otp, otpExpiresAt} = generateOtp();
+    user.otp = otp.toString()
+
+    // send otp
+    sendOTP(email, otp)
+
+
+    res.json({ 
+        email: email,
+        message: "Otp sent on email"
+    })
+}
+
 //api/auth/resend-otp
 export const resendEmail = async (req, res) => {
     const { email } = req.body;
@@ -80,28 +108,28 @@ export const resendEmail = async (req, res) => {
 
 // POST /api/auth/verify
 export const verifyOTP = async (req, res) => {
-  const { email, otp } = req.body;
+    const { email, otp } = req.body;
 
-  try {
-    const user = await User.findOne({ email });
+    try {
+        const user = await User.findOne({ email });
 
-    if (!user) return res.status(400).json({ error: "User not found" });
-    if (user.isVerified) return res.status(400).json({ error: "User already verified" });
+        if (!user) return res.status(400).json({ error: "User not found" });
+        if (user.isVerified) return res.status(400).json({ error: "User already verified" });
 
-    if (user.otp !== otp || user.otpExpiresAt < new Date()) {
-      return res.status(400).json({ error: "Invalid or expired OTP" });
+        if (user.otp !== otp || user.otpExpiresAt < new Date()) {
+            return res.status(400).json({ error: "Invalid or expired OTP" });
+        }
+
+        user.isVerified = true;
+        user.otp = "You have verified your email";
+        user.otpExpiresAt = null;
+        await user.save();
+
+        res.status(200).json({ message: "Email verified successfully. You can now log in." });
+    } catch (error) {
+        console.error("Error verifying OTP:", error);
+        res.status(500).json({ error: "Internal server error" });
     }
-
-    user.isVerified = true;
-    user.otp = "You have verified your email";
-    user.otpExpiresAt = null;
-    await user.save();
-
-    res.status(200).json({ message: "Email verified successfully. You can now log in." });
-  } catch (error) {
-    console.error("Error verifying OTP:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
 };
 // POST /api/auth/send-otp
 
@@ -110,10 +138,10 @@ export const login = async (req, res) => {
     try {
         const { email, password } = req.body;
         if (!email || !password) {
-            if (!email){
+            if (!email) {
                 return res.status(400).json({ error: "Email is required" });
             }
-            else{
+            else {
                 return res.status(400).json({ error: "Password is required" });
             }
         }
@@ -141,7 +169,7 @@ export const login = async (req, res) => {
             updatedAt: user.updatedAt,
             followers: user.followers,
             following: user.following,
-         });
+        });
     } catch (error) {
         console.error("Error in login:", error);
         res.status(500).json({ error: "Internal server error" });
@@ -157,7 +185,7 @@ export const logout = async (req, res) => {
             secure: true, // or false in dev
             sameSite: "strict",
             path: "/",
-          });   
+        });
         return res.status(200).json({ message: "Logged out successfully" });
     } catch (error) {
         console.error("Error in logout:", error);
@@ -171,7 +199,7 @@ export const getMe = async (req, res) => {
         if (!userId) {
             return res.status(401).json({ message: "Not authenticated" });
         }
-        
+
         const user = await User.findById(userId).select("-password");
         if (!user) {
             return res.status(404).json({ error: "User not found" });
