@@ -130,7 +130,7 @@ const LoginPage = () => {
             <Link to="/signup" className="btn rounded-2xl bg-[#dff2fe] text-[#153a54] w-full text-center">
               Sign up
             </Link>
-            <Link to="/signup" className="btn rounded-2xl bg-[#dff2fe] text-[#153a54] w-full text-center">
+            <Link to="/forgetPassword" className="btn rounded-2xl bg-[#dff2fe] text-[#153a54] w-full text-center">
               Forget Password
             </Link>
           </div>
