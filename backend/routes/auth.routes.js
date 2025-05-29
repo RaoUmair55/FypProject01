@@ -18,16 +18,4 @@ router.post("/resend-otp", resendEmail);
 router.post("/forgetPassword", forgetPassword);
 
 
-router.get("/test-email", async (req, res) => {
-  try {
-    console.log('EMAIL:', process.env.EMAIL);
-console.log('EMAIL_PASSWORD:', process.env.EMAIL_PASSWORD);
-    await sendOTP("hackthecode404@gmail.com", "123456");
-    res.status(200).json({ message: "Email sent successfully" });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Failed to send email" });
-  }
-});
-
 export default router
