@@ -54,6 +54,27 @@ const LoginPage = () => {
     }
   });
 
+  const resetPasswordMutation = useMutation({
+    mutationFn: async ({ email }) => {
+      const res = await fetch("/api/auth/forgetPassword", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Reset password failed");
+      return data;
+    },
+    onSuccess: () => {
+      toast.success("Reset password email sent");
+      navigate("/resetPassword", { state: { email: formData.email } });
+      setFormData({ email: "", password: "" }); // Clear form data after successful reset
+    },
+    onError: (err) => {
+      toast.error(err.message);
+    }
+  });
+
   const handleSubmit = (e) => {
     e.preventDefault();
     loginMutation(formData);
@@ -130,9 +151,10 @@ const LoginPage = () => {
             <Link to="/signup" className="btn rounded-2xl bg-[#dff2fe] text-[#153a54] w-full text-center">
               Sign up
             </Link>
-            <Link to="/forgetPassword" className="btn rounded-2xl bg-[#dff2fe] text-[#153a54] w-full text-center">
-              Forget Password
-            </Link>
+            <div  className="btn rounded-2xl bg-[#dff2fe] text-[#153a54] w-full text-center"
+              onClick={() => resetPasswordMutation.mutate({ email: formData.email })}>
+              {resetPasswordMutation.isPending ? "Sending..." : "Forget Password"}
+            </div>
           </div>
         </div>
       </div>
