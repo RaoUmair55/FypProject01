@@ -69,25 +69,67 @@ export const forgetPassword = async (req, res) => {
     }
 
     // check if a user exists with this email
-    const user = await User.findOne( {email} )
+    const user = await User.findOne({ email })
     if (!user) {
-        return res.status(400).json({error: "User not found"})
+        return res.status(400).json({ error: "User not found" })
     }
 
     // generate an OTP and set it in DB
-    const {otp, otpExpiresAt} = generateOtp();
+    const { otp, otpExpiresAt } = generateOtp();
     user.otp = otp.toString()
 
     // send otp
     sendOTP(email, otp)
 
-
-    res.json({ 
+    user.save()     // save the otp in the DB
+    res.json({
         email: email,
         message: "Otp sent on email"
     })
 }
 
+export const resetPassword = async (req, res) => {
+    try {
+        const { otp, newPassword, confirmNewPassword } = req.body;
+
+        if (!otp || !newPassword || !confirmNewPassword) {
+            return res.status(400).json({ error: "All fields are required" })
+        }
+
+        // matching the otp
+        const user = await User.findOne({ otp });            // dubious
+        if (!user){
+            return res.status(400).json({error: "Invalid or expired OTP"})
+        }
+
+        if (user.otp != otp) {
+            return res.status(400).json({ error: "OTP didn't match" })
+        }
+
+        // check if new password and confirm new password match
+        if (newPassword != confirmNewPassword) {
+            return res.status(400).json({ error: "new password and confirm new password doesn't match" })
+        }
+
+        // update and save the new passowrd in the daatabae
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(newPassword, salt);
+        user.password = hashedPassword;
+        
+        // remove the otp and otpExpiresAt from db
+        user.otp = null;
+        user.otpExpiresAt = null;
+
+        await user.save()
+
+        res.json({      // test response
+            message: "Password changed successfully"
+        })
+
+    } catch (error) {
+        console.log(error)
+    }
+}
 //api/auth/resend-otp
 export const resendEmail = async (req, res) => {
     const { email } = req.body;
