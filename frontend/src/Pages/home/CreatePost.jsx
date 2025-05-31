@@ -5,6 +5,8 @@ import { IoCloseSharp } from "react-icons/io5";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
 import { useEffect } from "react";
+import EmojiPicker from "emoji-picker-react";
+
 
 const CreatePost = () => {
    const textareaRef = useRef(null);
@@ -16,6 +18,10 @@ const CreatePost = () => {
    const imgRef = useRef(null);
    const { data: authUser } = useQuery({ queryKey: ["authUser"] });
    const queryClient = useQueryClient();
+   const emojiRef = useRef(null);
+
+   const [showPicker, setShowPicker] = useState(false);
+
 
    const {
       mutate: createPost,
@@ -73,6 +79,11 @@ const CreatePost = () => {
 
    // const isPending = false;
    // const isError = false;
+   const onEmojiClick = (emojiData) => {
+      setText(prev => prev + emojiData.emoji); // ✅ Correct
+      textareaRef.current.focus(); // optional: focus back on textarea
+   };
+
 
    const data = {
       profileImg: "/avatars/boy1.png",
@@ -132,6 +143,13 @@ const CreatePost = () => {
                },
                { once: true }
             );
+         }
+         if (
+            emojiRef.current &&
+            !emojiRef.current.contains(event.target) &&
+            !event.target.closest(".emoji-trigger")
+         ) {
+            setShowPicker(false);
          }
       };
 
@@ -216,9 +234,9 @@ const CreatePost = () => {
                      onChange={() => setCategory("Other")}
                   />
                </div>
-            <span className="text-gray-500 flex gap-3 items-center">Post anonymously
-               <input type="checkbox" checked={isAnonymous} className="toggle bg-black checked:bg-[#1a8cd8] " onChange={() => setIsAnonymous(!isAnonymous)} />
-            </span>
+               <span className="text-gray-500 flex gap-3 items-center">Post anonymously
+                  <input type="checkbox" checked={isAnonymous} className="toggle bg-black checked:bg-[#1a8cd8] " onChange={() => setIsAnonymous(!isAnonymous)} />
+               </span>
             </div>
 
             {img && (
@@ -243,7 +261,17 @@ const CreatePost = () => {
                      className="fill-[#153a54] w-6 h-6 cursor-pointer"
                      onClick={() => imgRef.current.click()}
                   />
-                  <BsEmojiSmileFill className="fill-[#153a54] w-5 h-5 cursor-pointer" />
+                  <div className="relative">
+
+                     <BsEmojiSmileFill
+                        className="fill-[#153a54] w-5 h-5 cursor-pointer emoji-trigger"
+                        onClick={() => setShowPicker(val => !val)}
+                     />
+                     {showPicker && (
+                        <div ref={emojiRef} className="absolute top-full mt-2 z-50">
+                           <EmojiPicker onEmojiClick={onEmojiClick} />
+                        </div>
+                     )}         </div>
                </div>
                <div className=" flex gap-2 items-center">
                   <input
@@ -261,6 +289,8 @@ const CreatePost = () => {
             </div>
             {isError && <div className="text-red-500">{error.message}</div>}
          </form>
+
+
       </div>
    );
 };
