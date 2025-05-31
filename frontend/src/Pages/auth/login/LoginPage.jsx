@@ -82,7 +82,7 @@ const LoginPage = () => {
 
   const verifyEmail = () => {
     if (!formData.email) {
-      toast.error("Please enter your email first");
+      toast.error("Please enter your email");
       return;
     }
     verifyEmailMutation.mutate({ email: formData.email });

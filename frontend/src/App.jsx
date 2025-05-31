@@ -8,7 +8,10 @@ import { Toaster } from 'react-hot-toast';
 import { useQuery } from '@tanstack/react-query';
 import LoadingSpinner from './components/common/LoadingSpinner';
 import CoolLoader from './utils/loader';
+import ForgetPassword from './Pages/auth/forgetPassword/ForgetPassword';
+// import ResetPassword from './Pages/auth/forgetPassword/ResetPassword';
 // Lazy-loaded pages
+const ResetPassword = lazy(() => import('./Pages/auth/forgetPassword/ResetPassword'))
 const HomePage = lazy(() => import('./Pages/home/HomePage'));
 const LoginPage = lazy(() => import('./Pages/auth/login/LoginPage'));
 const SignupPage = lazy(() => import('./Pages/auth/signup/SignUpPage'));
