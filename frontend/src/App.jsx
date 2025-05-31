@@ -58,6 +58,7 @@ function App() {
           <Route path="/verify" element={!authUser ? <VerifyOTPPage /> : <Navigate to="/" />} />
           <Route path="/notifications" element={authUser ? <NotificationPage /> : <Navigate to="/login" />} />
           <Route path="/profile/:id" element={authUser ? <ProfilePage /> : <Navigate to="/login" />} />
+          <Route path='/resetPassword' element={<ResetPassword />} />
         </Routes>
       </Suspense>
       
