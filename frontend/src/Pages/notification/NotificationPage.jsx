@@ -61,7 +61,7 @@ const NotificationPage = () => {
         <p className="font-bold text-3xl text-[#153a54]">Notifications</p>
         <div className="dropdown ">
           <div tabIndex={0} role="button" className="m-1">
-            <IoSettingsOutline className="w-8 text-[#153a54] " />
+            <IoSettingsOutline className="w-8 text-[#000000] " />
           </div>
           <ul
             tabIndex={0}

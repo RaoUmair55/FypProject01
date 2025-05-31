@@ -60,7 +60,7 @@ const { data: notificationCountData, isLoading: isCountLoading } = useQuery({
   refetchInterval: 10000,
 });
 
-const notificationCount = notificationCountData?.number || 1;
+const notificationCount = notificationCountData?.number || 0;
 
 const { data, isLoading } = useQuery({ queryKey: ["authUser"] });
 
