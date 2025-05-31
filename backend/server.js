@@ -5,7 +5,7 @@ import UserRoutes from './routes/user.routes.js';
 import postRoutes from './routes/post.routes.js';
 import notificationRoutes from './routes/notification.routes.js';
 import dotenv from 'dotenv';
-import connectMongoDB from './db/connectMongoDB.js.js';
+import connectMongoDB from './db/connectMongoDB.js';
 import cookieParser from 'cookie-parser';
 
 

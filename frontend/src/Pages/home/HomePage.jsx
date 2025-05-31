@@ -2,7 +2,6 @@ import { useState } from "react";
 
 import Posts from "../../components/common/Posts";
 import CreatePost from "./CreatePost";
-import { hanning } from "@xenova/transformers";
 
 const HomePage = () => {
 	const [feedType, setFeedType] = useState("forYou");
@@ -50,7 +49,6 @@ const HomePage = () => {
 						className="tab [--tab-bg:#ecf1fc] checked:rounded-full checked:text-black"
 						aria-label="Department"
 						value="Department"
-						defaultChecked
 						onChange={handleChangeCategory}
 					/>
 					<input
