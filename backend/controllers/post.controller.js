@@ -79,7 +79,9 @@ export const createPost = async (req, res) => {
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
-
+if (user.university === "Guest") {
+      return res.status(403).json({ error: "Guests cannot create posts" });
+    }
     const post = await Post.create({
       user: userId,
       text,
@@ -172,6 +174,7 @@ export const likeUnLike = async (req, res) => {
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
+    
 
     // Compare university values (assuming it's a string)
     if (String(post.user.university) !== String(user.university)) {

@@ -11,6 +11,7 @@ export const getUniversityFromEmail = (email) => {
     if (email.endsWith('@student.qau.edu.pk')) return 'Quaid-i-Azam University';
     if (email.endsWith('@student.uetpeshawar.edu.pk')) return 'University of Engineering and Technology Peshawar';
     if (email.endsWith('@student.uos.edu.pk')) return 'University of Sargodha';
+    if(email.endsWith('@gmail.com')) return 'Guest'; 
     if (email.startsWith('campusbuzz07') && email.endsWith('@gmail.com')) return 'Team CampusBuzz';
     // Add more universities here
     return null; // unknown

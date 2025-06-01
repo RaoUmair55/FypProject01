@@ -101,7 +101,8 @@ const { data, isLoading } = useQuery({ queryKey: ["authUser"] });
 						>
 							<IoNotifications className='w-6 h-6 text-[#0f1419]' />
 							<span className='text-lg hidden md:block'>Notifications </span>
-							<div className="badge badge-sm">{notificationCount}</div>
+							<div className="badge badge-sm hidden md:block">{notificationCount}</div>
+
 						</NavLink>
 					</li>
 
