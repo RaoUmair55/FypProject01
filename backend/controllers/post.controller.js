@@ -31,76 +31,133 @@ Sentence: "${text}"
   return output.trim();
 }
 
+
+
 export const createPost = async (req, res) => {
-  try {
-     console.log('--- Inside createPost Controller ---'); // Add this
-    console.log('req.body:', req.body); // <--- ADD THIS LINE to see what req.body contains
-    console.log('req.file:', req.file); // <--- ADD THIS LINE to see what req.file contains
+    try {
+        console.log('--- Inside createPost Controller ---');
+        console.log('req.body:', req.body); // Check what req.body contains
+        console.log('req.file:', req.file); // Check what req.file contains
 
-    const text = req.body.text;
-    const category = req.body.category;
-    const localFilePath = req.file?.path;
-    const isAnonymous = req.body.isAnonymous === 'true'; 
+        // Ensure req.body is not undefined before accessing its properties
+        // This is a safeguard; the ultimate goal is for Multer to populate req.body.
+        if (!req.body) {
+            console.error("Error: req.body is undefined. Multer might not have populated it correctly.");
+            return res.status(400).json({ error: "Request body is empty or malformed. Please ensure all form fields are sent." });
+        }
 
-    
-    if (!text || !category) {
-      return res.status(400).json({ error: "Text and category are required" });
-    }
+        const text = req.body.text;
+        const category = req.body.category;
+        const localFilePath = req.file?.path; // This will be undefined if no file was uploaded
+        
+        // FIX: Explicitly convert the string "true" or "false" to a boolean
+        const isAnonymous = req.body.isAnonymous === 'true'; 
 
-    if (isAnonymous) {
-      // Translate text from Roman Urdu to English
-      const pipe = await pipeline('sentiment-analysis', 'Xenova/distilbert-base-uncased-finetuned-sst-2-english');
-      
-      const translatedText = await main(text);
-      console.log("Translated Text:", translatedText);
+        if (!text || !category) {
+            return res.status(400).json({ error: "Text and category are required" });
+        }
 
-      if (!translatedText) {
-        return res.status(400).json({ error: "Translation failed or returned empty result." });
-      }
+        let sentimentLabel = null; // Initialize sentimentLabel
 
-      // Analyze sentiment
-      const sentiment = await pipe(translatedText);
-      const label = sentiment[0].label;
+        // Only perform sentiment analysis if the post is anonymous
+        if (isAnonymous) { 
+            const pipe = await pipeline('sentiment-analysis', 'Xenova/distilbert-base-uncased-finetuned-sst-2-english');
+            
+            // Assuming 'main' function is imported and correctly translates
+            // Add a check for 'main' function existence if it's not globally available
+            if (typeof main !== 'function') {
+                console.error("Error: 'main' translation function is not defined or imported.");
+                return res.status(500).json({ error: "Translation service not available." });
+            }
+            const translatedText = await main(text);
+            console.log("Translated Text for sentiment:", translatedText);
 
-      if (label === 'NEGATIVE') {
-        return res.status(400).json({
-          error: "⚠️ Your post contains negative sentiment. Consider rephrasing."
+            if (!translatedText) {
+                return res.status(400).json({ error: "Translation failed or returned empty result for sentiment analysis." });
+            }
+
+            const sentiment = await pipe(translatedText);
+            sentimentLabel = sentiment[0].label; // Store the label
+
+            if (sentimentLabel === 'NEGATIVE') {
+                return res.status(400).json({
+                    error: "⚠️ Your anonymous post contains negative sentiment. Consider rephrasing."
+                });
+            }
+        }
+
+        let imageUrl = '';
+        // Only attempt Cloudinary upload if a local file path exists
+        if (localFilePath) {
+            // Add a check for 'uploadOnCloudinary' function existence
+            if (typeof uploadOnCloudinary !== 'function') {
+                console.error("Error: 'uploadOnCloudinary' function is not defined or imported.");
+                // Clean up the local file if the function is missing
+                if (fs.existsSync(localFilePath)) {
+                    fs.unlinkSync(localFilePath);
+                }
+                return res.status(500).json({ error: "Image upload service not available." });
+            }
+            const cloudinaryResult = await uploadOnCloudinary(localFilePath);
+            if (!cloudinaryResult || !cloudinaryResult.secure_url) {
+                 console.error("Cloudinary upload failed:", cloudinaryResult);
+                 // Clean up the local file if upload failed
+                 if (fs.existsSync(localFilePath)) {
+                    fs.unlinkSync(localFilePath);
+                 }
+                 return res.status(500).json({ error: "Image upload failed." });
+            }
+            imageUrl = cloudinaryResult.secure_url;
+            console.log('Cloudinary result:', cloudinaryResult);
+            // Clean up the local file after successful upload
+            if (fs.existsSync(localFilePath)) {
+                fs.unlinkSync(localFilePath);
+            }
+        }
+
+        const userId = req.user._id; // Assuming req.user is populated by your authentication middleware
+        // Add a check for 'User' model existence
+        if (typeof User === 'undefined' || typeof User.findById !== 'function') {
+            console.error("Error: 'User' model is not defined or imported correctly.");
+            return res.status(500).json({ error: "User model not available." });
+        }
+        const user = await User.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+        if (user.university === "Guest") {
+            return res.status(403).json({ error: "Guests cannot create posts." });
+        }
+
+        // Add a check for 'Post' model existence
+        if (typeof Post === 'undefined' || typeof Post.create !== 'function') {
+            console.error("Error: 'Post' model is not defined or imported correctly.");
+            return res.status(500).json({ error: "Post model not available." });
+        }
+        const post = await Post.create({
+            user: userId,
+            text,
+            img: imageUrl,
+            university: user.university,
+            category,
+            isAnonymous,
         });
-      }
+
+        return res.status(201).json({ 
+            message: "Post created successfully", 
+            post, 
+            sentiment: sentimentLabel 
+        });
+
+    } catch (error) {
+        console.error("Create Post Error:", error);
+        // Differentiate between Mongoose validation errors and other server errors
+        if (error.name === 'ValidationError') {
+            return res.status(400).json({ error: error.message });
+        }
+        res.status(500).json({ error: "Internal server error" });
     }
-
-    let imageUrl = '';
-    if (localFilePath) {
-      const cloudinaryResult = await uploadOnCloudinary(localFilePath);
-      imageUrl = cloudinaryResult?.secure_url;
-      console.log('Cloudinary result:', cloudinaryResult);
-      // Optionally: fs.unlinkSync(localFilePath);
-    }
-
-    const userId = req.user._id;
-    const user = await User.findById(userId);
-
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
-if (user.university === "Guest") {
-      return res.status(403).json({ error: "Guests cannot create posts" });
-    }
-    const post = await Post.create({
-      user: userId,
-      text,
-      img: imageUrl,
-      university: user.university,
-      category,
-      isAnonymous,
-    });
-
-    return res.status(201).json({ message: "Post created successfully", post });
-
-  } catch (error) {
-    console.error("Create Post Error:", error);
-    res.status(500).json({ error: "Server error" });
-  }
 };
 
 
