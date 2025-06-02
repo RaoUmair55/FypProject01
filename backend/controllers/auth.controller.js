@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import { generateTokenAndSetCookie } from "../utills/generateTokenAndSetCookie.js";
 import sendOTP from "../utills/mailer.js";
 import { generateOtp } from "../utills/generateOtp.js";
+import { generateToken } from "../utills/generateToken.js";
 
 export const signup = async (req, res) => {
     try {
