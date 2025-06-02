@@ -9,14 +9,14 @@ import sendOTP from "../utills/mailer.js";
 
 
 
-router.get("/getMe", protectRoute, getMe);
-router.post("/signup", signup);
-router.post("/login", login);
-router.post("/logout", logout);
-router.post("/verify-otp", verifyOTP);
-router.post("/resend-otp", resendEmail);
-router.post("/forgetPassword", forgetPassword);
-router.post("/resetPassword", resetPassword);
+router.get("/getMe",express.json(), protectRoute, getMe);
+router.post("/signup", express.json(), signup);
+router.post("/login", express.json(), login);
+router.post("/logout", express.json(), logout);
+router.post("/verify-otp", express.json(), verifyOTP);
+router.post("/resend-otp", express.json(), resendEmail);
+router.post("/forgetPassword", express.json(), forgetPassword);
+router.post("/resetPassword", express.json(), resetPassword);
 
 
 export default router
