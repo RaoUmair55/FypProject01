@@ -8,7 +8,7 @@ export const generateTokenAndSetCookie = (userId, res) => {
         httpOnly: true,
         // IMPORTANT: secure MUST be true for SameSite: 'None' to work.
         // This ensures the cookie is only sent over HTTPS.
-        secure: process.env.NODE_ENV === 'production', 
+        secure: true, 
         // SameSite: 'None' allows cross-site requests to send the cookie.
         sameSite: 'None', 
         maxAge: 15 * 24 * 60 * 60 * 1000, // 15 days
