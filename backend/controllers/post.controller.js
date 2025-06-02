@@ -33,6 +33,10 @@ Sentence: "${text}"
 
 export const createPost = async (req, res) => {
   try {
+     console.log('--- Inside createPost Controller ---'); // Add this
+    console.log('req.body:', req.body); // <--- ADD THIS LINE to see what req.body contains
+    console.log('req.file:', req.file); // <--- ADD THIS LINE to see what req.file contains
+
     const text = req.body.text;
     const category = req.body.category;
     const localFilePath = req.file?.path;
