@@ -24,7 +24,7 @@ function App() {
     queryKey: ['authUser'],
     queryFn: async () => {
       try {
-        const res = await fetch("api/auth/getMe");
+        const res = await fetch("https://fypproject01.onrender.com/api/auth/getMe");
         const data = await res.json();
         if (data.error) return null;
         if (!res.ok) {

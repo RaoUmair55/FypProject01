@@ -9,17 +9,17 @@ const Posts = ({ feedType, username, userId, category }) => {
   const getPostEndPoint = () => {
     switch (feedType) {
       case "forYou":
-        return "/api/posts/all";
+        return "https://fypproject01.onrender.com/api/posts/all";
       case "following":
-        return "/api/posts/following";
+        return "https://fypproject01.onrender.com/api/posts/following";
       case "posts":
-        return username ? `/api/posts/userPosts/${username}` : null;
+        return username ? `https://fypproject01.onrender.com/api/posts/userPosts/${username}` : null;
       case "likes":
-        return userId ? `/api/posts/getlikedPost/${userId}` : null;
+        return userId ? `https://fypproject01.onrender.com/api/posts/getlikedPost/${userId}` : null;
       case "category":
-        return category ? `/api/posts/category/${category}` : null;
+        return category ? `https://fypproject01.onrender.com/api/posts/category/${category}` : null;
       default:
-        return "/api/posts/all";
+        return "https://fypproject01.onrender.com/api/posts/all";
     }
   };
 

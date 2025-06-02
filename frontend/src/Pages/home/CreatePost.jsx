@@ -283,7 +283,7 @@ const CreatePost = () => {
                   />
 
                   <button className="btn  bg-[#1d9bf0] text-white rounded-full btn-sm hover:bg-[#1a8cd8] px-4">
-                     {isPending ? "Posting..." : "Post"}
+                     {isPending ? "Buzzing..." : "Buzzz"}
                   </button>
                </div>
             </div>

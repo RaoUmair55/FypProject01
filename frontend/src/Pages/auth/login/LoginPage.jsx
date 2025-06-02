@@ -16,7 +16,7 @@ const LoginPage = () => {
 
   const { mutate: loginMutation, isPending: isLoginPending, isError: isLoginError, error: loginError } = useMutation({
     mutationFn: async ({ email, password }) => {
-      const res = await fetch("/api/auth/login", {
+      const res = await fetch("https://fypproject01.onrender.com/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -36,7 +36,7 @@ const LoginPage = () => {
 
   const verifyEmailMutation = useMutation({
     mutationFn: async ({ email }) => {
-      const res = await fetch("/api/auth/resend-otp", {
+      const res = await fetch("https://fypproject01.onrender.com/api/auth/resend-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
@@ -56,7 +56,7 @@ const LoginPage = () => {
 
   const resetPasswordMutation = useMutation({
     mutationFn: async ({ email }) => {
-      const res = await fetch("/api/auth/forgetPassword", {
+      const res = await fetch("https://fypproject01.onrender.com/api/auth/forgetPassword", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email }),
