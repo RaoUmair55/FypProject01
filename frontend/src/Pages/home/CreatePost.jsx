@@ -32,20 +32,20 @@ const CreatePost = () => {
             try {
                 const formData = new FormData();
                 formData.append("text", text);
+                formData.append("category", category);
+                formData.append("isAnonymous", isAnonymous.toString());
                 if (img) {
                     formData.append("image", img); // Ensure your backend expects 'image' for the file
                 }
-                formData.append("category", category);
-                formData.append("isAnonymous", isAnonymous.toString()); // Convert boolean to string for FormData
+                const token = localStorage.getItem("jwt_token");
 
-                // Use authenticatedFetch for the API call
-                // For FormData, the 'Content-Type' header is automatically set by the browser
-                // to 'multipart/form-data', so we don't explicitly set 'application/json' here.
-                const result = await authenticatedFetch("/api/posts/create", {
+                const result = await fetch("https://fypproject01.onrender.com/api/posts/create", {
                     method: "POST",
+                    headers: {
+                        Authorization: `Bearer ${token}`, // ✅ Send token manually
+                    },
+                    credentials: "include",
                     body: formData,
-                    // Do NOT set 'Content-Type': 'multipart/form-data' explicitly here.
-                    // The browser handles it automatically when you provide a FormData object.
                 });
 
                 // authenticatedFetch already handles !res.ok and error parsing,
@@ -55,7 +55,7 @@ const CreatePost = () => {
             } catch (error) {
                 console.error("Error in createPost mutation:", error);
                 // authenticatedFetch already throws an Error object, so just re-throw it.
-                throw error; 
+                throw error;
             }
         },
         onSuccess: (dataFromMutation) => { // Access the returned data here
