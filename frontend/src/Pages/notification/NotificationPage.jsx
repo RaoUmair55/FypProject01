@@ -5,55 +5,69 @@ import { Link } from "react-router-dom";
 import { IoSettingsOutline } from "react-icons/io5";
 import { FaUser } from "react-icons/fa";
 import { FaHeart } from "react-icons/fa6";
-import  LoadingSpinner  from "../../components/common/LoadingSpinner";
+import LoadingSpinner from "../../components/common/LoadingSpinner";
+import { authenticatedFetch } from "../../utils/authenticatedFetch"; // Import the helper
 
 const NotificationPage = () => {
-  const queryClient = useQueryClient();
+    const queryClient = useQueryClient();
 
-  const { data: notifications, isLoading } = useQuery({
-    queryKey: ["notifications"],
-    queryFn: async () => {
-      const res = await fetch("/api/notifications");
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Something went wrong");
-      return data.notifications;
-    },
-  });
+    const { data: notifications, isLoading, isError, error } = useQuery({ // Added isError and error for better handling
+        queryKey: ["notifications"],
+        queryFn: async () => {
+            try {
+                // Use authenticatedFetch for fetching notifications
+                const data = await authenticatedFetch("/api/notifications");
+                return data.notifications; // Assuming the API returns { notifications: [...] }
+            } catch (error) {
+                console.error("Error fetching notifications:", error);
+                throw error; // Re-throw for react-query to handle
+            }
+        },
+    });
 
-  const { mutate: deleteNotifications } = useMutation({
-    mutationFn: async () => {
-      const res = await fetch("/api/notifications", { method: "DELETE" });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Something went wrong");
-      return data;
-    },
-    onSuccess: () => {
-      toast.success("Notifications deleted");
-      queryClient.invalidateQueries(["notifications"]);
-    },
-    onError: (error) => {
-      toast.error(error.message);
-    },
-  });
+    const { mutate: deleteNotifications, isPending: isDeletingNotifications } = useMutation({ // Added isPending
+        mutationFn: async () => {
+            try {
+                // Use authenticatedFetch for deleting all notifications
+                const data = await authenticatedFetch("/api/notifications", { method: "DELETE" });
+                return data;
+            } catch (error) {
+                console.error("Error deleting notifications:", error);
+                throw error;
+            }
+        },
+        onSuccess: () => {
+            toast.success("Notifications deleted");
+            queryClient.invalidateQueries({ queryKey: ["notifications"] }); // Use object for invalidateQueries
+        },
+        onError: (error) => {
+            toast.error(error.message);
+        },
+    });
 
-  // Mark as read mutation
-  const { mutate: markAsRead } = useMutation({
-    mutationFn: async (id) => {
-      const res = await fetch(`/api/notifications/${id}/read`, {
-        method: "PUT",
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to mark as read");
-      return data;
-    },
-    onSuccess: () => {
-      toast.success("Marked as read");
-      queryClient.invalidateQueries(["notifications"]);
-    },
-    onError: (error) => {
-      toast.error(error.message);
-    },
-  });
+    // Mark as read mutation
+    const { mutate: markAsRead, isPending: isMarkingAsRead } = useMutation({ // Added isPending
+        mutationFn: async (id) => {
+            try {
+                // Use authenticatedFetch for marking a notification as read
+                const data = await authenticatedFetch(`/api/notifications/${id}/read`, {
+                    method: "PUT",
+                });
+                return data;
+            } catch (error) {
+                console.error(`Error marking notification ${id} as read:`, error);
+                throw error;
+            }
+        },
+        onSuccess: () => {
+            toast.success("Marked as read");
+            queryClient.invalidateQueries({ queryKey: ["notifications"] }); // Use object for invalidateQueries
+        },
+        onError: (error) => {
+            toast.error(error.message);
+        },
+    });
+
 
   return (
     <div className="border-2 border-gray-300 flex-[6_0_0] mr-auto rounded-2xl bg-[#fff] px-5 py-2 min-h-screen">

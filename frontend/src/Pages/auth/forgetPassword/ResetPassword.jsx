@@ -2,13 +2,13 @@ import { useMutation } from "@tanstack/react-query";
 import React, { useState } from "react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
-
+import { authenticatedFetch } from "../../../utils/authenticatedFetch"; // Import the helper
 
 const ResetPassword = () => {
     const [otp, setOtp] = useState("");
     const [newPassword, setNewPassword] = useState("");
     const [confirmNewPassword, setConfirmNewPassword] = useState("");
-    const [loading, setLoading] = useState(false);
+    // Removed local 'loading' state, will use isResetPasswordPending from useMutation
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
 
@@ -16,31 +16,33 @@ const ResetPassword = () => {
 
     const { mutate: resetPasswordMutation, isPending: isResetPasswordPending, isError: isResetPasswordError, error: resetPasswordError } = useMutation({
         mutationFn: async ({ otp, newPassword, confirmNewPassword }) => {
-            const res = await fetch("/api/auth/resetPassword", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ otp, newPassword, confirmNewPassword })
-            });
-            
-            const data = await res.json();
-
-            if (!res.ok) {
-                throw new Error(data.error || "Reset Password failed");
+            try {
+                // Use authenticatedFetch for the reset password API call
+                // It automatically handles Content-Type: application/json and Authorization header
+                const data = await authenticatedFetch("/api/auth/resetPassword", {
+                    method: "POST",
+                    body: JSON.stringify({ otp, newPassword, confirmNewPassword })
+                });
+                
+                return data;
+            } catch (err) {
+                console.error("Error during reset password mutation:", err);
+                throw err; // Re-throw for react-query to handle
             }
-
-            // console.log("Sending:", { otp, newPassword, confirmNewPassword });
-
-            return data
         },
         onSuccess: () => {
-            toast.success("Reset password successful");
-            navigate("/login")
-            //   queryClient.invalidateQueries({ queryKey: ["authUser"] });
+            toast.success("Password reset successful");
+            setSuccess("Password reset successful! You can now log in."); // Set local success message
+            setOtp("");
+            setNewPassword("");
+            setConfirmNewPassword("");
+            navigate("/login");
         },
         onError: (err) => {
             toast.error(err.message);
+            setError(err.message); // Set local error message
         }
-    })
+    });
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -53,36 +55,6 @@ const ResetPassword = () => {
         }
 
         resetPasswordMutation({ otp, newPassword, confirmNewPassword });
-
-        // setLoading(true);
-        // try {
-        //     // Replace with your API endpoint
-        //     const response = await fetch("/api/auth/resetPassword", {
-        //         method: "POST",
-        //         headers: {
-        //             "Content-Type": "application/json",
-        //         },
-        //         body: JSON.stringify({
-        //             otp,
-        //             newPassword,
-        //         }),
-        //     });
-
-        //     const data = await response.json();
-
-        //     if (!response.ok) {
-        //         setError(data.message || "Failed to reset password.");
-        //     } else {
-        //         setSuccess("Password reset successful! You can now log in.");
-        //         setOtp("");
-        //         setNewPassword("");
-        //         setConfirmNewPassword("");
-        //     }
-        // } catch (err) {
-        //     setError("Something went wrong. Please try again.");
-        // } finally {
-        //     setLoading(false);
-        // }
     };
 
     return (
@@ -131,9 +103,9 @@ const ResetPassword = () => {
                     <button
                         type="submit"
                         className="w-full btn rounded-2xl bg-[#dff2fe] text-[#153a54] py-2 px-4 transition duration-200"
-                        disabled={loading}
+                        disabled={isResetPasswordPending} // Use isResetPasswordPending
                     >
-                        {loading ? "Resetting..." : "Reset Password"}
+                        {isResetPasswordPending ? "Resetting..." : "Reset Password"}
                     </button>
                 </form>
             </div>

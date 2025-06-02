@@ -1,70 +1,67 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { authenticatedFetch } from "../../utils/authenticatedFetch"; // Import the helper
 
 const EditProfileModal = ({authUser}) => {
-	const queryClient = useQueryClient();
-	const [formData, setFormData] = useState({
-		fullName: "",
-		username: "",
-		email: "",
-		bio: "",
-		link: "",
-		newPassword: "",
-		currentPassword: "",
-	});
+    const queryClient = useQueryClient();
+    const [formData, setFormData] = useState({
+        fullName: "",
+        username: "",
+        email: "",
+        bio: "",
+        link: "",
+        newPassword: "",
+        currentPassword: "",
+    });
 
 
-	const {mutate:updateProfile, isPending:isUpdatingProfile} = useMutation({
-		mutationFn: async () => {
-			try {
-				const res = await fetch(`/api/user/updateProfile`, {
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify(formData),
-				})
+    const {mutate:updateProfile, isPending:isUpdatingProfile} = useMutation({
+        mutationFn: async () => {
+            try {
+                // Use authenticatedFetch for updating profile
+                // It automatically adds the Authorization header and handles JSON content type
+                const data = await authenticatedFetch(`/api/user/updateProfile`, {
+                    method: "POST",
+                    body: JSON.stringify(formData),
+                });
+                return data;
+            } catch (error) {
+                console.error("Error updating profile in EditProfileModal:", error);
+                throw error; // Re-throw for react-query to handle
+            }
+        },
+        onSuccess: () => {
+            toast.success("Profile updated");
+            // Invalidate queries to refetch latest user data across the app
+            Promise.all([
+                queryClient.invalidateQueries({queryKey: ["authUser"]}),
+                queryClient.invalidateQueries({queryKey: ["userProfile"]}), 
+            ])
+        },
+        onError: (error) => {
+            toast.error(error.message);
+        },
+    })
 
-				const data = await res.json();
+    const handleInputChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
 
-				if(!res.ok) {
-					throw new Error(data.error || "Something went wrong");
-				}
-				return data
-			} catch (error) {
-				throw new Error(error.message);
-			}
-		},
-		onSuccess: () => {
-			toast.success("Profile updated");
-			Promise.all([
-				queryClient.invalidateQueries({queryKey: ["authUser"]}),
-				queryClient.invalidateQueries({queryKey: ["userProfile"]}), 
-			])
-		},
-		onError: (error) => {
-			toast.error(error.message);
-		},
-	})
-
-	const handleInputChange = (e) => {
-		setFormData({ ...formData, [e.target.name]: e.target.value });
-	};
-
-	useEffect(() => {
-		if(authUser) {
-			setFormData({
-				fullName: authUser.fullName,
-				username: authUser.username,
-				email: authUser.email,
-				bio: authUser.bio,
-				link: authUser.link,
-				newPassword: "",
-				currentPassword: "",
-			})
-		}
-	}, [authUser])
+    useEffect(() => {
+        // Populate form data with authUser details when the modal opens or authUser changes
+        if(authUser) {
+            setFormData({
+                fullName: authUser.fullName,
+                username: authUser.username,
+                email: authUser.email,
+                bio: authUser.bio,
+                link: authUser.link,
+                newPassword: "", // Passwords should not be pre-filled
+                currentPassword: "", // Passwords should not be pre-filled
+            })
+        }
+    }, [authUser])
 
 	return (
 		<>

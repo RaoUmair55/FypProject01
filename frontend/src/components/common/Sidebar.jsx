@@ -7,66 +7,72 @@ import { BiLogOut } from "react-icons/bi";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import 'animate.css';
+import { authenticatedFetch } from "../../utils/authenticatedFetch"; // Import the helper
 
 const Sidebar = () => {
-	const queryClient = useQueryClient();
+    const queryClient = useQueryClient();
 
-	// Logout mutation
-	const {
-		mutate: logoutMutation,
-		isPending,
-		isError,
-		error,
-	} = useMutation({
-		mutationFn: async () => {
-			try {
-				const res = await fetch("api/auth/logout", {
-					method: "POST",
-				});
-				const data = await res.json();
-				if (!res.ok) {
-					throw new Error(data.error || "Logout failed");
-				}
-			} catch (err) {
-				throw new Error(err.message || "Logout error");
-			}
-		},
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ["authUser"] });
-			toast.success("Logout successful");
-		},
-		onError: () => {
-			toast.error("Couldn't logout");
-		},
-	});
-const { data: notificationCountData, isLoading: isCountLoading } = useQuery({
-  queryKey: ["notificationCount"],
-  queryFn: async () => {
-    const res = await fetch("/api/notifications/number", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
+    // Logout mutation
+    const {
+        mutate: logoutMutation,
+        isPending: isLoggingOut, // Renamed to avoid conflict with general isLoading
+        isError: isLogoutError,
+        error: logoutError,
+    } = useMutation({
+        mutationFn: async () => {
+            try {
+                // Use authenticatedFetch for logout
+                // authenticatedFetch handles the response.ok check and error parsing
+                const res = await authenticatedFetch("/api/auth/logout", {
+                    method: "POST",
+                });
+                return res; // Assuming res is just a success indicator
+            } catch (err) {
+                console.error("Error during logout mutation:", err);
+                throw err; // Re-throw for react-query to handle
+            }
+        },
+        onSuccess: () => {
+            // Clear the token from localStorage on successful logout
+            localStorage.removeItem("jwt_token");
+            queryClient.invalidateQueries({ queryKey: ["authUser"] });
+            toast.success("Logout successful");
+            // No explicit navigate here, App.jsx handles redirect based on authUser
+        },
+        onError: (error) => {
+            toast.error(error.message || "Couldn't logout");
+        },
     });
 
-    if (!res.ok) {
-      console.error("Error fetching notification count");
-      throw new Error("Failed to fetch notification count");
+    const { data: authUser, isLoading: isAuthUserLoading } = useQuery({ queryKey: ["authUser"] });
+
+    const { data: notificationCountData, isLoading: isCountLoading } = useQuery({
+        queryKey: ["notificationCount"],
+        queryFn: async () => {
+            try {
+                // Use authenticatedFetch for notifications count
+                const data = await authenticatedFetch("/api/notifications/number");
+                return data; // { number: X }
+            } catch (error) {
+                console.error("Error fetching notification count:", error);
+                throw error; // Re-throw for react-query to handle
+            }
+        },
+        refetchInterval: 10000,
+        // Only enable this query if an authUser exists
+        enabled: !!authUser, 
+    });
+
+    const notificationCount = notificationCountData?.number || 0;
+
+    // Use the authUser data variable that was already defined
+    const data = authUser; 
+    const isLoading = isAuthUserLoading; // Use the loading state for authUser
+
+    if (isLoading) {
+        return <div className="p-4 text-center text-gray-600">Loading sidebar...</div>;
     }
 
-    const data = await res.json();
-    return data; // { number: X }
-  },
-  refetchInterval: 10000,
-});
-
-const notificationCount = notificationCountData?.number || 0;
-
-const { data, isLoading } = useQuery({ queryKey: ["authUser"] });
-
-	if (isLoading) {
-		return <div className="p-4 text-center text-gray-600">Loading sidebar...</div>;
-	}
 
 	return (
 		<div className='md:flex-[4_4_0] w-18 max-w-72 md:w-full md:block sticky top-0 left-0 '>

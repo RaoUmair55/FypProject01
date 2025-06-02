@@ -5,162 +5,193 @@ import { MdOutlineMail, MdPassword } from "react-icons/md";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
 
+
 const LoginPage = () => {
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
+    const navigate = useNavigate();
+    const queryClient = useQueryClient();
 
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
+    const [formData, setFormData] = useState({
+        email: "",
+        password: "",
+    });
 
-  const { mutate: loginMutation, isPending: isLoginPending, isError: isLoginError, error: loginError } = useMutation({
-    mutationFn: async ({ email, password }) => {
-      const res = await fetch("https://fypproject01.onrender.com/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Login failed");
-       localStorage.setItem("jwt_token", data.token);
-      return data;
-    },
-    onSuccess: () => {
-      toast.success("Login successful");
-      queryClient.invalidateQueries({ queryKey: ["authUser"] });
-    },
-    onError: (err) => {
-      toast.error(err.message);
-    }
-  });
+    // Define the backend URL using the environment variable
+    const BACKEND_URL ="https://fypproject01.onrender.com";
 
-  const verifyEmailMutation = useMutation({
-    mutationFn: async ({ email }) => {
-      const res = await fetch("https://fypproject01.onrender.com/api/auth/resend-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Verification failed");
-      return data;
-    },
-    onSuccess: () => {
-      toast.success("Verification email sent");
-      navigate("/verify", { state: { email: formData.email } });
-    },
-    onError: (err) => {
-      toast.error(err.message);
-    }
-  });
+    const { mutate: loginMutation, isPending: isLoginPending, isError: isLoginError, error: loginError } = useMutation({
+        mutationFn: async ({ email, password }) => {
+            try {
+                // Use authenticatedFetch for login
+                // Note: authenticatedFetch usually expects a token, but for login, it's not present yet.
+                // We'll call it directly without the Authorization header for login.
+                // If your backend's login endpoint is NOT protected by the auth middleware,
+                // then a regular fetch is fine. If it IS protected, that's an unusual setup.
+                // Assuming login is NOT protected and does not need a token to send.
+                const res = await fetch(`${BACKEND_URL}/api/auth/login`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email, password }),
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || "Login failed");
 
-  const resetPasswordMutation = useMutation({
-    mutationFn: async ({ email }) => {
-      const res = await fetch("https://fypproject01.onrender.com/api/auth/forgetPassword", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Reset password failed");
-      return data;
-    },
-    onSuccess: () => {
-      toast.success("Reset password email sent");
-      navigate("/resetPassword", { state: { email: formData.email } });
-      setFormData({ email: "", password: "" }); // Clear form data after successful reset
-    },
-    onError: (err) => {
-      toast.error(err.message);
-    }
-  });
+                // Store the token in localStorage after successful login
+                localStorage.setItem("jwt_token", data.token);
+                return data;
+            } catch (err) {
+                console.error("Error during login mutation:", err);
+                throw err;
+            }
+        },
+        onSuccess: () => {
+            toast.success("Login successful");
+            queryClient.invalidateQueries({ queryKey: ["authUser"] }); // This will trigger App.jsx to refetch authUser
+        },
+        onError: (err) => {
+            toast.error(err.message);
+        }
+    });
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    loginMutation(formData);
-  };
+    const verifyEmailMutation = useMutation({
+        mutationFn: async ({ email }) => {
+            try {
+                // This endpoint might not require authentication, but if it does, use authenticatedFetch.
+                // Assuming it's not protected, a direct fetch is fine.
+                const res = await fetch(`${BACKEND_URL}/api/auth/resend-otp`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email }),
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || "Verification failed");
+                return data;
+            } catch (err) {
+                console.error("Error during verify email mutation:", err);
+                throw err;
+            }
+        },
+        onSuccess: () => {
+            toast.success("Verification email sent");
+            navigate("/verify", { state: { email: formData.email } });
+        },
+        onError: (err) => {
+            toast.error(err.message);
+        }
+    });
 
-  const verifyEmail = () => {
-    if (!formData.email) {
-      toast.error("Please enter your email");
-      return;
-    }
-    verifyEmailMutation.mutate({ email: formData.email });
-  };
+    const resetPasswordMutation = useMutation({
+        mutationFn: async ({ email }) => {
+            try {
+                // This endpoint might not require authentication, but if it does, use authenticatedFetch.
+                // Assuming it's not protected, a direct fetch is fine.
+                const res = await fetch(`${BACKEND_URL}/api/auth/forgetPassword`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email }),
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || "Reset password failed");
+                return data;
+            } catch (err) {
+                console.error("Error during reset password mutation:", err);
+                throw err;
+            }
+        },
+        onSuccess: () => {
+            toast.success("Reset password email sent");
+            navigate("/resetPassword", { state: { email: formData.email } });
+            setFormData({ email: "", password: "" }); // Clear form data after successful reset
+        },
+        onError: (err) => {
+            toast.error(err.message);
+        }
+    });
 
-  const handleInputChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        loginMutation(formData);
+    };
 
-  return (
-    <>
-      <div className="absolute w-[300px] h-[300px] bg-white opacity-30 rounded-full blur-[120px] top-10 left-60 z-0"></div>
-      <div className="absolute w-[300px] h-[300px] bg-white opacity-30 rounded-full blur-[120px] top-[280px] right-60 z-0"></div>
+    const verifyEmail = () => {
+        if (!formData.email) {
+            toast.error("Please enter your email");
+            return;
+        }
+        verifyEmailMutation.mutate({ email: formData.email });
+    };
 
-      <div className="card lg:card-side bg-[#f8f9fd] shadow-sm mx-auto my-40 flex p-10 rounded-lg border-2 border-[#a8cbff] shadow-[#153a54]">
-        <div className="flex-1 hidden border-r border-[#153a54] lg:flex items-center justify-center">
-          <XSvg className="logo lg:w-4/3 fill-white" />
-        </div>
-        <div className="flex-1 flex flex-col justify-center items-center">
-          <form className="dw-2xs max-w-10xl mx-auto flex flex-col gap-4" onSubmit={handleSubmit}>
-            <XSvg className="w-24 lg:hidden fill-white mx-auto" />
-            <h1 className="text-4xl font-extrabold text-[#153a54]">{"Let's"} go.</h1>
+    const handleInputChange = (e) => {
+        setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
 
-            <label className="input input-bordered rounded flex items-center gap-2 bg-[#153a54]">
-              <MdOutlineMail className="text-[#f8f9fd]" />
-              <input
-                type="text"
-                className="grow"
-                placeholder="student@gmail.com"
-                name="email"
-                onChange={handleInputChange}
-                value={formData.email}
-              />
-            </label>
+    return (
+        <>
+            <div className="absolute w-[300px] h-[300px] bg-white opacity-30 rounded-full blur-[120px] top-10 left-60 z-0"></div>
+            <div className="absolute w-[300px] h-[300px] bg-white opacity-30 rounded-full blur-[120px] top-[280px] right-60 z-0"></div>
 
-            <label className="input input-bordered rounded flex items-center gap-2 bg-[#153a54]">
-              <MdPassword className="text-[#f8f9fd]" />
-              <input
-                type="password"
-                className="grow"
-                placeholder="Password"
-                name="password"
-                onChange={handleInputChange}
-                value={formData.password}
-              />
-            </label>
+            <div className="card lg:card-side bg-[#f8f9fd] shadow-sm mx-auto my-40 flex p-10 rounded-lg border-2 border-[#a8cbff] shadow-[#153a54]">
+                <div className="flex-1 hidden border-r border-[#153a54] lg:flex items-center justify-center">
+                    <XSvg className="logo lg:w-4/3 fill-white" />
+                </div>
+                <div className="flex-1 flex flex-col justify-center items-center">
+                    <form className="dw-2xs max-w-10xl mx-auto flex flex-col gap-4" onSubmit={handleSubmit}>
+                        <XSvg className="w-24 lg:hidden fill-white mx-auto" />
+                        <h1 className="text-4xl font-extrabold text-[#153a54]">{"Let's"} go.</h1>
 
-            <button className="btn rounded-2xl bg-[#dff2fe] text-[#153a54]" disabled={isLoginPending}>
-              {isLoginPending ? "Logging in..." : "Login"}
-            </button>
+                        <label className="input input-bordered rounded flex items-center gap-2 bg-[#153a54]">
+                            <MdOutlineMail className="text-[#f8f9fd]" />
+                            <input
+                                type="text"
+                                className="grow"
+                                placeholder="student@gmail.com"
+                                name="email"
+                                onChange={handleInputChange}
+                                value={formData.email}
+                            />
+                        </label>
 
-            {isLoginError && <p className="text-red-500">{loginError.message}</p>}
-          </form>
+                        <label className="input input-bordered rounded flex items-center gap-2 bg-[#153a54]">
+                            <MdPassword className="text-[#f8f9fd]" />
+                            <input
+                                type="password"
+                                className="grow"
+                                placeholder="Password"
+                                name="password"
+                                onChange={handleInputChange}
+                                value={formData.password}
+                            />
+                        </label>
 
-          <div className="flex flex-col gap-2 mt-4">
-            <button data-tip="Enter Your email to verify"
-              className="text-[#153a54] text-lg text-left underline hover:text-blue-700"
-              onClick={verifyEmail}
-              disabled={verifyEmailMutation.isPending}
-            >
-              {verifyEmailMutation.isPending ? "Sending..." : "Verify Your Email"}
-            </button>
+                        <button className="btn rounded-2xl bg-[#dff2fe] text-[#153a54]" disabled={isLoginPending}>
+                            {isLoginPending ? "Logging in..." : "Login"}
+                        </button>
 
-            <p className="text-[#153a54] text-lg">{"Don't"} have an account?</p>
+                        {isLoginError && <p className="text-red-500">{loginError.message}</p>}
+                    </form>
 
-            <Link to="/signup" className="btn rounded-2xl bg-[#dff2fe] text-[#153a54] w-full text-center">
-              Sign up
-            </Link>
-            <div  className="btn rounded-2xl bg-[#dff2fe] text-[#153a54] w-full text-center"
-              onClick={() => resetPasswordMutation.mutate({ email: formData.email })}>
-              {resetPasswordMutation.isPending ? "Sending..." : "Forget Password"}
+                    <div className="flex flex-col gap-2 mt-4">
+                        <button data-tip="Enter Your email to verify"
+                            className="text-[#153a54] text-lg text-left underline hover:text-blue-700"
+                            onClick={verifyEmail}
+                            disabled={verifyEmailMutation.isPending}
+                        >
+                            {verifyEmailMutation.isPending ? "Sending..." : "Verify Your Email"}
+                        </button>
+
+                        <p className="text-[#153a54] text-lg">{"Don't"} have an account?</p>
+
+                        <Link to="/signup" className="btn rounded-2xl bg-[#dff2fe] text-[#153a54] w-full text-center">
+                            Sign up
+                        </Link>
+                        <div className="btn rounded-2xl bg-[#dff2fe] text-[#153a54] w-full text-center"
+                            onClick={() => resetPasswordMutation.mutate({ email: formData.email })}>
+                            {resetPasswordMutation.isPending ? "Sending..." : "Forget Password"}
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
-        </div>
-      </div>
-    </>
-  );
+        </>
+    );
 };
 
 export default LoginPage;

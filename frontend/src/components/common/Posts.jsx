@@ -3,23 +3,30 @@ import { useInView } from "react-intersection-observer";
 import Post from "./Post";
 import PostSkeleton from "../skeletons/PostSkeleton";
 import { useEffect } from "react";
+import { authenticatedFetch } from "../../utils/authenticatedFetch"; // Adjust the import path as needed
 
 const Posts = ({ feedType, username, userId, category }) => {
   const { ref, inView } = useInView();
+  
+  // Define the backend URL for the API client
+  const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000';
+
   const getPostEndPoint = () => {
     switch (feedType) {
       case "forYou":
-        return "https://fypproject01.onrender.com/api/posts/all";
+        // When using authenticatedFetch, you pass the relative path,
+        // as the helper prepends the BACKEND_URL.
+        return "/api/posts/all"; 
       case "following":
-        return "https://fypproject01.onrender.com/api/posts/following";
+        return "/api/posts/following";
       case "posts":
-        return username ? `https://fypproject01.onrender.com/api/posts/userPosts/${username}` : null;
+        return username ? `/api/posts/userPosts/${username}` : null;
       case "likes":
-        return userId ? `https://fypproject01.onrender.com/api/posts/getlikedPost/${userId}` : null;
+        return userId ? `/api/posts/getlikedPost/${userId}` : null;
       case "category":
-        return category ? `https://fypproject01.onrender.com/api/posts/category/${category}` : null;
+        return category ? `/api/posts/category/${category}` : null;
       default:
-        return "https://fypproject01.onrender.com/api/posts/all";
+        return "/api/posts/all";
     }
   };
 
@@ -40,18 +47,29 @@ const Posts = ({ feedType, username, userId, category }) => {
         throw new Error("Invalid endpoint. Missing username or userId.");
       }
 
-      const res = await fetch(`${POST_ENDPOINT}?page=${pageParam}&limit=15`);
-      const result = await res.json();
+      // Construct the full URL with query parameters for pagination.
+      // authenticatedFetch will prepend the base backend URL.
+      const urlWithParams = `${POST_ENDPOINT}?page=${pageParam}&limit=15`;
 
-      if (!res.ok) {
-        throw new Error(result.error || "Something went wrong");
+      try {
+        // Use authenticatedFetch instead of direct fetch
+        // It handles the full URL construction and error checking (res.ok)
+        const result = await authenticatedFetch(urlWithParams);
+
+        // authenticatedFetch already handles !res.ok and error parsing,
+        // so you can directly return the result.
+        return {
+          posts: Array.isArray(result.posts) ? result.posts : [],
+          nextPage: pageParam + 1,
+          total: result.total || 0,
+        };
+
+      } catch (error) {
+        // authenticatedFetch throws an error if the response is not ok,
+        // or if authentication fails (401/403).
+        console.error("Error fetching posts:", error);
+        throw error; // Re-throw the error for useInfiniteQuery to handle
       }
-
-      return {
-        posts: Array.isArray(result.posts) ? result.posts : [],
-        nextPage: pageParam + 1,
-        total: result.total || 0,
-      };
     },
     enabled: !!POST_ENDPOINT, // Only fetch if endpoint is valid
     getNextPageParam: (lastPage, allPages) => {
@@ -69,8 +87,8 @@ const Posts = ({ feedType, username, userId, category }) => {
 
   const posts = Array.isArray(data?.pages)
     ? data.pages.flatMap((page) =>
-      Array.isArray(page?.posts) ? page.posts : []
-    )
+        Array.isArray(page?.posts) ? page.posts : []
+      )
     : [];
 
   return (
