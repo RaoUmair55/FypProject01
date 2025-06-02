@@ -113,7 +113,7 @@ const ProfilePage = () => {
 				{/* HEADER */}
 				{(isLoading || isRefetching) && <ProfileHeaderSkeleton />}
 				{!isLoading && !isRefetching && !user && <p className='text-center text-lg mt-4'>User not found</p>}
-				<div className='flex flex-col gap-2'>
+				<div className='flex flex-col gap-2 '>
 					{!isLoading && !isRefetching && user && (
 						<>
 								<div className='flex gap-10 px-4 py-2 items-center text-black border border-gray-300 rounded-lg bg-white'>

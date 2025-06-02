@@ -14,7 +14,7 @@ const HomePage = () => {
 
 	return (
 		<>
-			<div className='flex-[6_0_0] mr-auto min-h-screen rounded-2xl px-5 py-2 '>
+			<div className='flex-[6_0_0] mr-auto min-h-screen rounded-2xl px-0 sm:px-5 py-2 '>
 				{/* Header */}
 				<div className='flex w-full border-2 border-gray-300 bg-[#fff]  rounded-2xl'>
 					<div
@@ -42,7 +42,7 @@ const HomePage = () => {
 				{/*  CREATE POST INPUT */}
 				<CreatePost />
 				{/* name of each tab group should be unique */}
-				<div className="tabs tabs-box flex justify-evenly bg-[#ffffff] ">
+				<div className="tabs tabs-box sm:flex justify-evenly bg-[#ffffff] ">
 					<input
 						type="radio"
 						name="category"

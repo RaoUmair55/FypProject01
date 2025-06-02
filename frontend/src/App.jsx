@@ -2,7 +2,8 @@ import React, { lazy, Suspense, useEffect } from 'react';
 import './index.css';
 import { Navigate, Route, Routes } from 'react-router-dom';
 
-import Sidebar from './components/common/Sidebar';
+import Sidebar from "./components/common/Sidebar";
+import MobileSidebar from "./components/common/MobileSidebar";
 import RightPanel from './components/common/RightPanel';
 import { Toaster } from 'react-hot-toast';
 import { useQuery } from '@tanstack/react-query';
@@ -47,8 +48,14 @@ function App() {
   }
 
   return (
-    <div className='flex max-w-7xl mx-auto gap-10 pt-3'>
-      {authUser && <Sidebar />}
+    <div className='flex max-w-7xl mx-auto gap-2 px-3 md:p-4 md:gap-10 pt-3'>
+
+      {/* Desktop Sidebar */}
+      {authUser && (
+        <div className="hidden md:block">
+          <Sidebar />
+        </div>
+      )}
 
       <Suspense fallback={<div className='flex justify-center items-center w-full h-screen'><CoolLoader height={200} /></div>}>
         <Routes>
@@ -63,6 +70,10 @@ function App() {
       </Suspense>
       
       {authUser && <RightPanel />}
+
+      {/* Mobile Sidebar (Bottom Nav) */}
+      {authUser && <MobileSidebar />}
+
       <Toaster />
     </div>
   );

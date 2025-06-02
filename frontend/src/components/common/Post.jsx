@@ -138,7 +138,7 @@ const Post = ({ post }) => {
 
 	return (
 		<>
-			<div className='flex gap-2 items-start p-4 border-2 border-[#dce1e7] my-4 rounded-2xl bg-white'>
+			<div className='post-card flex gap-2 items-start p-4 border-2 border-[#dce1e7] my-4 rounded-2xl bg-white'>
 				<div className='avatar'>
 					{post.isAnonymous ? (
 						<div
