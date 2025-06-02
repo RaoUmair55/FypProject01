@@ -36,7 +36,7 @@ const CreatePost = () => {
                     formData.append("image", img); // Ensure your backend expects 'image' for the file
                 }
                 formData.append("category", category);
-                formData.append("isAnonymous", isAnonymous);
+                formData.append("isAnonymous", isAnonymous.toString()); // Convert boolean to string for FormData
 
                 // Use authenticatedFetch for the API call
                 // For FormData, the 'Content-Type' header is automatically set by the browser

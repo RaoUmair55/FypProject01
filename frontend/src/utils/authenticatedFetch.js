@@ -1,19 +1,22 @@
-// src/api/authenticatedFetch.js
 const BACKEND_URL = "https://fypproject01.onrender.com";
 
 export async function authenticatedFetch(endpoint, options = {}) {
     const token = localStorage.getItem("jwt_token");
 
     if (!token) {
-        // Handle case where user is not authenticated (e.g., redirect to login)
         throw new Error("User not authenticated.");
     }
 
     const headers = {
-        'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`,
-        ...options.headers, // Allow overriding/adding other headers
+        ...options.headers,
     };
+
+    // Only add JSON Content-Type if not sending FormData
+    const isFormData = options.body instanceof FormData;
+    if (!isFormData) {
+        headers['Content-Type'] = 'application/json';
+    }
 
     const res = await fetch(`${BACKEND_URL}${endpoint}`, {
         ...options,
@@ -21,9 +24,7 @@ export async function authenticatedFetch(endpoint, options = {}) {
     });
 
     if (res.status === 401) {
-        // Token expired or invalid, clear it and force re-authentication
         localStorage.removeItem("jwt_token");
-        // Optionally, trigger a redirect to login page if you have a centralized auth context
         window.location.href = '/login'; 
         throw new Error("Unauthorized: Please log in again.");
     }
