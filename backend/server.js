@@ -12,7 +12,7 @@ import cookieParser from 'cookie-parser';
 // --- IMPORTANT: Import the necessary middleware and controller ---
 import { upload } from './middleware/multer.middleware.js'; // Adjust path if needed
 import { createPost } from './controllers/post.controller.js'; // Adjust path if needed
-import { protectRoute } from './middlewares/protectRoute.js'; // Adjust path if needed
+import { protectRoute } from './middleware/protectRoute.js'; // Adjust path if needed
 // -------------------------------------------------------------------------
 
 dotenv.config();
