@@ -199,7 +199,8 @@ export const login = async (req, res) => {
         if (!isPasswordMatch) {
             return res.status(400).json({ error: "Invalid credentials" });
         }
-        generateTokenAndSetCookie(user._id, res);
+        // generateTokenAndSetCookie(user._id, res)
+        const token = generateToken(user._id);
 
         res.status(200).json({
             _id: user._id,
@@ -211,6 +212,8 @@ export const login = async (req, res) => {
             updatedAt: user.updatedAt,
             followers: user.followers,
             following: user.following,
+            token: token,
+
         });
     } catch (error) {
         console.error("Error in login:", error);

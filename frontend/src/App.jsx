@@ -25,14 +25,29 @@ function App() {
     queryKey: ['authUser'],
     queryFn: async () => {
       try {
-        const res = await fetch("https://fypproject01.onrender.com/api/auth/getMe");
+        const token = localStorage.getItem("jwt_token"); // Get token from localStorage
+
+        if (!token) return null; // No token, no authenticated user
+
+        const res = await fetch(`https://fypproject01.onrender.com/api/auth/getMe`, {
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}` // Send token in Authorization header
+          },
+        });
         const data = await res.json();
-        if (data.error) return null;
+        if (data.error) {
+          localStorage.removeItem("jwt_token"); // Remove token if there's an error
+          return null;
+        }
         if (!res.ok) {
+           localStorage.removeItem("jwt_token"); // Clear token on network error
           throw new Error(data.error || "Something went wrong");
         }
         return data;
       } catch (error) {
+                        localStorage.removeItem("jwt_token"); // Ensure token is cleared on any error
+
         throw new Error(error);
       }
     },
@@ -68,7 +83,7 @@ function App() {
           <Route path='/resetPassword' element={<ResetPassword />} />
         </Routes>
       </Suspense>
-      
+
       {authUser && <RightPanel />}
 
       {/* Mobile Sidebar (Bottom Nav) */}

@@ -23,6 +23,7 @@ const LoginPage = () => {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Login failed");
+       localStorage.setItem("jwt_token", data.token);
       return data;
     },
     onSuccess: () => {
