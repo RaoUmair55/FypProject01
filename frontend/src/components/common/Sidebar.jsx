@@ -69,7 +69,7 @@ const { data, isLoading } = useQuery({ queryKey: ["authUser"] });
 	}
 
 	return (
-		<div className='md:flex-[4_4_0] w-18 max-w-72 md:w-full md:block'>
+		<div className='md:flex-[4_4_0] w-18 max-w-72 md:w-full md:block sticky top-0 left-0 '>
 			<div className='sticky top-0 left-0 height-self flex flex-col border-2 border-gray-300 w-20 md:w-full rounded-2xl bg-white shadow-2xl shadow-gray-300 animate__animated animate__fadeInLeft'>
 				<Link to='/' className='flex justify-center items-center md:justify-start bg-[#ecf1fc] rounded-t-2xl'>
 					<XSvg className='px-2 w-32 rounded-full fill-white' />

@@ -38,3 +38,24 @@ textarea{
 .height-self{
   height:96dvh;
 }
+
+
+@media only screen and (min-width: 300px) and (max-width: 600px) {
+  *{
+    font-size: 0.8rem;
+  }
+  .post-card {
+    /* width: 70vw; */
+    /* font-size: .8rem; */
+   
+  }
+
+  /* .sidebar{
+    display: none;
+  } */
+
+  .app{
+    
+  }
+
+}
