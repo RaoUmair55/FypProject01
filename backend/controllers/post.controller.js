@@ -36,15 +36,15 @@ export const createPost = async (req, res) => {
     const text = req.body.text;
     const category = req.body.category;
     const localFilePath = req.file?.path;
-    const isAnonymous = req.body.isAnonymous;
+    const isAnonymous = req.body.isAnonymous ;
 
     console.log(typeof(isAnonymous));
-    
+
     if (!text || !category) {
       return res.status(400).json({ error: "Text and category are required" });
     }
 
-    if (isAnonymous === 'true') {
+    if (isAnonymous === "true") {
       // Translate text from Roman Urdu to English
       const pipe = await pipeline('sentiment-analysis', 'Xenova/distilbert-base-uncased-finetuned-sst-2-english');
 
