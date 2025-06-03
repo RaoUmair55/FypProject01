@@ -34,15 +34,7 @@ const CreatePost = () => {
                 formData.append("text", text);
                 formData.append("category", category);
                 formData.append("isAnonymous", isAnonymous.toString());
-                if (img) {
-                    formData.append("image", img); // Ensure your backend expects 'image' for the file
-                }
-                if (dataFromMutation.sentiment === "NEGATIVE") {
-                    // Replaced alert with toast as per instructions
-                    toast.error("Your post seems to have a negative sentiment. Please reconsider the tone.");
-                } else {
-                    toast.success("Post created!");
-                }
+               
                 const token = localStorage.getItem("jwt_token");
 
                 const result = await fetch("https://fypproject01.onrender.com/api/posts/create", {
@@ -70,11 +62,10 @@ const CreatePost = () => {
             setImg(null);
             imgRef.current.value = null; // Clear the file input
 
-            // Use dataFromMutation for sentiment check
-
             queryClient.invalidateQueries({ queryKey: ["posts"] });
         },
         onError: (error) => {
+            console.error("Error creating post:", error);
             toast.error(error.message);
         },
     });
