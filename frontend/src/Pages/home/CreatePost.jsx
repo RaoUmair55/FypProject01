@@ -37,6 +37,12 @@ const CreatePost = () => {
                 if (img) {
                     formData.append("image", img); // Ensure your backend expects 'image' for the file
                 }
+                if (dataFromMutation.sentiment === "NEGATIVE") {
+                    // Replaced alert with toast as per instructions
+                    toast.error("Your post seems to have a negative sentiment. Please reconsider the tone.");
+                } else {
+                    toast.success("Post created!");
+                }
                 const token = localStorage.getItem("jwt_token");
 
                 const result = await fetch("https://fypproject01.onrender.com/api/posts/create", {
@@ -65,12 +71,7 @@ const CreatePost = () => {
             imgRef.current.value = null; // Clear the file input
 
             // Use dataFromMutation for sentiment check
-            if (dataFromMutation.sentiment === "NEGATIVE") {
-                // Replaced alert with toast as per instructions
-                toast.error("Your post seems to have a negative sentiment. Please reconsider the tone.");
-            } else {
-                toast.success("Post created!");
-            }
+
             queryClient.invalidateQueries({ queryKey: ["posts"] });
         },
         onError: (error) => {

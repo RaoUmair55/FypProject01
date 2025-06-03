@@ -36,17 +36,17 @@ export const createPost = async (req, res) => {
     const text = req.body.text;
     const category = req.body.category;
     const localFilePath = req.file?.path;
-    const isAnonymous = req.body.isAnonymous === 'true'; 
+    const isAnonymous = req.body.isAnonymous === 'true';
 
-    
+
     if (!text || !category) {
       return res.status(400).json({ error: "Text and category are required" });
     }
-    
-    if (isAnonymous === "true") {
+
+    if (isAnonymous) {
       // Translate text from Roman Urdu to English
       const pipe = await pipeline('sentiment-analysis', 'Xenova/distilbert-base-uncased-finetuned-sst-2-english');
-      
+
       const translatedText = await main(text);
       console.log("Translated Text:", translatedText);
 
@@ -79,7 +79,7 @@ export const createPost = async (req, res) => {
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
-if (user.university === "Guest") {
+    if (user.university === "Guest") {
       return res.status(403).json({ error: "Guests cannot create posts" });
     }
     const post = await Post.create({
@@ -174,7 +174,7 @@ export const likeUnLike = async (req, res) => {
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
-    
+
 
     // Compare university values (assuming it's a string)
     if (String(post.user.university) !== String(user.university)) {
