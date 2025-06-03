@@ -38,7 +38,8 @@ export const createPost = async (req, res) => {
     const localFilePath = req.file?.path;
     const isAnonymous = req.body.isAnonymous;
 
-
+    console.log(typeof(isAnonymous));
+    
     if (!text || !category) {
       return res.status(400).json({ error: "Text and category are required" });
     }

@@ -33,24 +33,24 @@ const MobileSidebar = () => {
     // Logout mutation
     const { mutate: logoutMutation } = useMutation({
         mutationFn: async () => {
-            try {
-                // Use authenticatedFetch for logout (if it's a protected route)
-                // For logout, you might not need to send a body, just the method
-                // Note: authenticatedFetch expects a JSON response. If your logout
-                // endpoint sends plain text or no content, adjust accordingly.
-                const res = await authenticatedFetch("api/auth/logout", { method: "POST" });
+           try {
+                // Use authenticatedFetch for logout
+                // authenticatedFetch handles the response.ok check and error parsing
+                const res = await authenticatedFetch("/api/auth/logout", {
+                    method: "POST",
+                });
                 return res; // Assuming res is just a success indicator
-            } catch (error) {
-                console.error("Error during logout mutation:", error);
-                throw error; // Re-throw for react-query to handle
+            } catch (err) {
+                console.error("Error during logout mutation:", err);
+                throw err; // Re-throw for react-query to handle
             }
         },
         onSuccess: () => {
             // Clear the token from localStorage on successful logout
-            localStorage.removeItem("jwt_token"); 
+            localStorage.removeItem("jwt_token");
             queryClient.invalidateQueries({ queryKey: ["authUser"] });
             toast.success("Logout successful");
-            navigate("/login");
+            // No explicit navigate here, App.jsx handles redirect based on authUser
         },
         onError: (error) => {
             toast.error(error.message || "Couldn't logout");
