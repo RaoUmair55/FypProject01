@@ -48,21 +48,39 @@ const CreatePost = () => {
 
                 // authenticatedFetch already handles !res.ok and error parsing,
                 // so you can directly return the result.
-                return result;
+                let data;
+                try {
+                    data = await result.json();
+                                       
+                } catch (error) {
+                    console.error("Error parsing response JSON:", error);
+                    throw new Error("Failed to parse server response");
+                }
+                if (!result.ok) {
+                    console.error("Error response from server:", data);
+                    throw new Error(data.message || "Failed to create post");
+                }
 
             } catch (error) {
                 console.error("Error in createPost mutation:", error);
                 // authenticatedFetch already throws an Error object, so just re-throw it.
-                throw error;
+                throw new Error(error.message || "Failed to create post");
             }
+            return data; // Return the data from the server
         },
-        onSuccess: (dataFromMutation) => { // Access the returned data here
-            console.log("Post creation successful:", dataFromMutation);
+        onSuccess: () => { // Access the returned data here
+            console.log("Post creation successful:", data);
             setText("");
             setImg(null);
+            toast.success("Post created successfully!");
             imgRef.current.value = null; // Clear the file input
 
             queryClient.invalidateQueries({ queryKey: ["posts"] });
+            if (data?.sentiment === "NEGATIVE") {
+                alert("Your post has been flagged as negative. Please review it before proceeding.");
+            } else {
+               toast.success("Post created successfully!");
+            }
         },
         onError: (error) => {
             console.error("Error creating post:", error);
