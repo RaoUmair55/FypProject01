@@ -9,7 +9,7 @@ const VerifyOTPPage = () => {
     const email = location.state?.email;
 
     // Define the backend URL using the environment variable
-    const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000';
+    const BACKEND_URL = "https://fypproject01.onrender.com";
 
     const handleSubmit = async (e) => {
         e.preventDefault();

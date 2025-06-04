@@ -11,7 +11,8 @@ router.get("/getlikedPost/:userId", protectRoute, likedPost);
 router.get("/userPosts/:username", protectRoute, getUserPosts);
 router.post('/create', protectRoute, upload.single("image"), createPost);
 router.post('/like/:id', protectRoute, likeUnLike);
-router.post('/comment/:id', protectRoute, commentPost);
+app.use(express.json()); // Ensure JSON body parsing is enabled
+router.post('/comment/:id', express.json(), protectRoute, commentPost);
 router.delete('/:id', protectRoute, deletePost);
 router.get("/category/:categorytype", protectRoute, getPostsByCategory);
 

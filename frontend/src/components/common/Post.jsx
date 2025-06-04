@@ -100,20 +100,32 @@ const Post = ({ post }) => {
         }
     });
 
-    const { mutate: commentPost, isPending: isCommenting } = useMutation({
-        mutationFn: async () => {
-            try {
-                // Use authenticatedFetch for POST request (commenting)
-                const data = await authenticatedFetch(`/api/posts/comment/${post._id}`, {
-                    method: "POST",
-                    body: JSON.stringify({ text: comment }),
-                });
-                return data;
-            } catch (error) {
-                console.error("Error commenting on post:", error);
-                throw error;
+   const { mutate: commentPost, isPending: isCommenting } = useMutation({
+    mutationFn: async (commentText) => {
+        try {
+            const token = localStorage.getItem("jwt_token"); // Or however you're storing the token
+
+            const response = await fetch(`https://fypproject01.onrender.com/api/posts/comment/${post._id}`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                },
+                body: JSON.stringify({ text: commentText }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data?.error || "Failed to post comment");
             }
-        },
+
+            return data;
+        } catch (error) {
+            console.error("Error commenting on post:", error);
+            throw error;
+        }
+    },
         onSuccess: () => {
             toast.success("Commented on the Buzz successfully");
             setComment(""); // reset the state
@@ -129,9 +141,11 @@ const Post = ({ post }) => {
     };
 
     const handlePostComment = (e) => {
-        e.preventDefault();
-        if (isCommenting || !comment.trim()) return; // Prevent empty comments
-        commentPost();
+       if (!comment.trim()) {
+        toast.error("Comment cannot be empty");
+        return;
+    }
+    commentPost(comment);
     };
 
     const handleLikePost = () => {

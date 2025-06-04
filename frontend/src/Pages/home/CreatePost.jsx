@@ -33,42 +33,42 @@ const CreatePost = () => {
                 const formData = new FormData();
                 formData.append("text", text);
                 formData.append("category", category);
+                if(img) {
+                    formData.append("image", img);
+                }
                 formData.append("isAnonymous", isAnonymous.toString());
-               
+
                 const token = localStorage.getItem("jwt_token");
 
                 const result = await fetch("https://fypproject01.onrender.com/api/posts/create", {
                     method: "POST",
                     headers: {
-                        Authorization: `Bearer ${token}`, // ✅ Send token manually
+                        Authorization: `Bearer ${token}`,
                     },
                     credentials: "include",
                     body: formData,
                 });
 
-                // authenticatedFetch already handles !res.ok and error parsing,
-                // so you can directly return the result.
                 let data;
                 try {
                     data = await result.json();
-                                       
                 } catch (error) {
                     console.error("Error parsing response JSON:", error);
                     throw new Error("Failed to parse server response");
                 }
+
                 if (!result.ok) {
                     console.error("Error response from server:", data);
-                    throw new Error(data.message || "Failed to create post");
+                    throw new Error(data.message || data.error || "Failed to create post");
                 }
 
+                return data; // ✅ Moved this inside the try block
             } catch (error) {
                 console.error("Error in createPost mutation:", error);
-                // authenticatedFetch already throws an Error object, so just re-throw it.
                 throw new Error(error.message || "Failed to create post");
             }
-            return data; // Return the data from the server
         },
-        onSuccess: () => { // Access the returned data here
+        onSuccess: (data) => {
             console.log("Post creation successful:", data);
             setText("");
             setImg(null);
@@ -76,16 +76,8 @@ const CreatePost = () => {
             imgRef.current.value = null; // Clear the file input
 
             queryClient.invalidateQueries({ queryKey: ["posts"] });
-            if (data?.sentiment === "NEGATIVE") {
-                alert("Your post has been flagged as negative. Please review it before proceeding.");
-            } else {
-               toast.success("Post created successfully!");
-            }
-        },
-        onError: (error) => {
-            console.error("Error creating post:", error);
-            toast.error(error.message);
-        },
+
+        }
     });
 
     const onEmojiClick = (emojiData) => {
