@@ -127,7 +127,6 @@ export const commentPost = async (req, res) => {
     const postId = req.params.id; // Assuming the post ID is passed as a URL parameter
     const { text } = req.body; // Assuming the comment text is sent in the request body
     const userId = req.user._id; // Assuming you have the user ID in req.user
-console.table(userId, postId, text);
     if (!text) {
       return res.status(400).json({ error: "Comment text is required" });
     }
