@@ -4,11 +4,9 @@ import Post from "../models/post.model.js";
 import { uploadOnCloudinary } from "../utills/uploadCloudinary.js";
 import { pipeline } from "@xenova/transformers";
 import { GoogleGenAI } from '@google/genai';
-import dotenv from "dotenv"
+import { GEMINI_API_KEY } from "../config/env.js";
+import { getReceiverSocketId, io } from "../socket/socket.js";
 
-dotenv.config()
-
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY });
 
 async function main(text) {
@@ -36,9 +34,9 @@ export const createPost = async (req, res) => {
     const text = req.body.text;
     const category = req.body.category;
     const localFilePath = req.file?.path;
-    const isAnonymous = req.body.isAnonymous ;
+    const isAnonymous = req.body.isAnonymous;
 
-    console.log(typeof(isAnonymous));
+
 
     if (!text || !category) {
       return res.status(400).json({ error: "Text and category are required" });
@@ -192,11 +190,15 @@ export const likeUnLike = async (req, res) => {
       await post.save();
 
       if (String(post.user._id) !== String(userId)) {
-        await Notification.create({
+        const notification = await Notification.create({
           from: userId,
           to: post.user._id,
           type: "like",
         });
+        const receiverSocketId = getReceiverSocketId(post.user._id);
+        if (receiverSocketId) {
+          io.to(receiverSocketId).emit("newNotification", notification);
+        }
       }
 
       const updatedPost = await Post.findById(postId).populate("user", "university");

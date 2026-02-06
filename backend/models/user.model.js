@@ -15,6 +15,11 @@ const userSchema = new mongoose.Schema({
         required: true,
         unique: true,
     },
+    role: {
+        type: String,
+        enum: ["student", "admin", "superadmin"],
+        default: "student",
+    },
     password: {
         type: String,
         required: true,
@@ -37,8 +42,8 @@ const userSchema = new mongoose.Schema({
     ],
     university: {
         type: String,
-        required: true 
-   },
+        required: true
+    },
     bio: {
         type: String,
         default: "",

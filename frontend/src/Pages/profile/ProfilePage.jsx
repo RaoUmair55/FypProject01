@@ -21,9 +21,13 @@ import toast from "react-hot-toast";
 // import { anonymous } from "../../utils/anonymous"; // This import seems unused or for a different context
 
 // Import the authenticatedFetch helper
-import { authenticatedFetch } from "../../utils/authenticatedFetch"; 
+import api from "../../utils/api";
+import useAuthUser from "../../hooks/useAuthUser";
 
 const ProfilePage = () => {
+    const { data: authUser } = useAuthUser();
+    const { id } = useParams();
+    const queryClient = useQueryClient();
     const [coverImg, setCoverImg] = useState(null);
     const [profileImg, setProfileImg] = useState(null);
     const [feedType, setFeedType] = useState("posts");
@@ -31,50 +35,40 @@ const ProfilePage = () => {
     const coverImgRef = useRef(null);
     const profileImgRef = useRef(null);
 
-    const {id} = useParams();
-    
-    const queryClient = useQueryClient();
-    const {follow, isPending: isFollowing} = useFollow(); // Renamed isPending to isFollowing to avoid conflict
-    const {data:authUser} = useQuery({queryKey: ["authUser"]});
-
-    const {data:user, isLoading, refetch, isRefetching} = useQuery({
-        queryKey: ["userProfile", id], // Add id to queryKey for better caching
+    const { follow, isFollowing } = useFollow();
+    // ...
+    const { data: user, isLoading, refetch, isRefetching } = useQuery({
+        queryKey: ["userProfile", id],
         queryFn: async () => {
             try {
-                // Use authenticatedFetch for fetching user profile
-                const data = await authenticatedFetch(`/api/user/profile/${id}`);
-                return data;
+                const res = await api.get(`/user/profile/${id}`);
+                return res.data;
             } catch (error) {
                 console.error("Error fetching user profile:", error);
-                throw error; // Re-throw for react-query to handle
+                throw error;
             }
         },
-        enabled: !!id, // Only fetch if ID is available
+        enabled: !!id,
     });
 
-    const {mutate:updateProfile, isPending:isUpdatingProfile} = useMutation({
+    const { mutate: updateProfile, isPending: isUpdatingProfile } = useMutation({
         mutationFn: async () => {
             try {
-                // Use authenticatedFetch for updating profile
-                const data = await authenticatedFetch(`/api/user/updateProfile`, {
-                    method: "POST",
-                    // authenticatedFetch already sets "Content-Type": "application/json" by default
-                    body: JSON.stringify({
-                        coverImg,
-                        profileImg
-                    }),
+                const res = await api.post("/user/updateProfile", {
+                    coverImg,
+                    profileImg
                 });
-                return data;
+                return res.data;
             } catch (error) {
                 console.error("Error updating profile:", error);
-                throw error; // Re-throw for react-query to handle
+                throw error;
             }
         },
         onSuccess: () => {
             toast.success("Profile updated");
             Promise.all([
-                queryClient.invalidateQueries({queryKey: ["authUser"]}),
-                queryClient.invalidateQueries({queryKey: ["userProfile"]}), 
+                queryClient.invalidateQueries({ queryKey: ["authUser"] }),
+                queryClient.invalidateQueries({ queryKey: ["userProfile"] }),
             ])
         },
         onError: (error) => {
@@ -108,32 +102,34 @@ const ProfilePage = () => {
 
     return (
         <>
-            <div className='flex-[4_4_0] rounded-2xl min-h-screen '>
+            <div className='flex-[4_4_0] min-h-screen '>
                 {/* HEADER */}
                 {(isLoading || isRefetching) && <ProfileHeaderSkeleton />}
-                {!isLoading && !isRefetching && !user && <p className='text-center text-lg mt-4'>User not found</p>}
-                <div className='flex flex-col gap-2 '>
+                {!isLoading && !isRefetching && !user && <p className='text-center text-lg mt-4 text-artistic-muted'>User not found</p>}
+                <div className='flex flex-col gap-4 '>
                     {!isLoading && !isRefetching && user && (
                         <>
-                            <div className='flex gap-10 px-4 py-2 items-center text-black border border-gray-300 rounded-lg bg-white'>
+                            <div className='flex gap-10 px-4 py-2 items-center text-white glass-panel sticky top-0 z-10 backdrop-blur-md'>
                                 <Link to='/'>
-                                    <FaArrowLeft className='w-4 h-4 text-[#153a54]' />
+                                    <FaArrowLeft className='w-4 h-4 text-white hover:text-artistic-primary transition-colors' />
                                 </Link>
                                 <div className='flex flex-col'>
-                                    <p className='font-bold text-lg'>{user?.fullName}</p>
+                                    <p className='font-bold text-lg font-heading tracking-wide'>{user?.fullName}</p>
+                                    <span className='text-sm text-artistic-muted'>{user?.posts?.length || 0} posts</span>
                                 </div>
                             </div>
-                            <div className=" flex flex-col bg-white rounded-b-2xl border border-gray-300">
+
+                            <div className="flex flex-col glass-panel overflow-hidden mx-4 rounded-3xl">
                                 {/* COVER IMG */}
-                                <div className='relative group/cover'>
+                                <div className='relative group/cover h-52'>
                                     <img
                                         src={coverImg || user?.coverImg || "/cover.png"}
-                                        className='h-52 w-full object-cover rounded-lg'
+                                        className='h-full w-full object-cover'
                                         alt='cover image'
                                     />
                                     {isMyProfile && (
                                         <div
-                                            className='absolute top-2 right-2 rounded-full p-2 bg-gray-800 bg-opacity-75 cursor-pointer opacity-0 group-hover/cover:opacity-100 transition duration-200'
+                                            className='absolute top-2 right-2 rounded-full p-2 bg-black/50 cursor-pointer opacity-0 group-hover/cover:opacity-100 transition duration-200 hover:bg-black/70'
                                             onClick={() => coverImgRef.current.click()}
                                         >
                                             <MdEdit className='w-5 h-5 text-white' />
@@ -154,14 +150,19 @@ const ProfilePage = () => {
                                         ref={profileImgRef}
                                         onChange={(e) => handleImgChange(e, "profileImg")}
                                     />
+
                                     {/* USER AVATAR */}
-                                    <div className='avatar absolute -bottom-16 left-4'>
-                                        <div className='w-32 rounded-full relative group/avatar'>
-                                            <img src={profileImg || user?.profileImg || "/avatar-placeholder.png"} alt="Profile" />
-                                            <div className='absolute top-5 right-3 p-1 bg-primary rounded-full group-hover/avatar:opacity-100 opacity-0 cursor-pointer'>
+                                    <div className='absolute -bottom-16 left-4'>
+                                        <div className='w-32 h-32 rounded-full relative group/avatar border-4 border-[#0F1115] overflow-hidden'>
+                                            <img
+                                                src={profileImg || user?.profileImg || "/avatar-placeholder.png"}
+                                                alt="Profile"
+                                                className="w-full h-full object-cover"
+                                            />
+                                            <div className='absolute inset-0 bg-black/40 flex items-center justify-center group-hover/avatar:opacity-100 opacity-0 cursor-pointer transition-opacity duration-200'>
                                                 {isMyProfile && (
                                                     <MdEdit
-                                                        className='w-4 h-4 text-white'
+                                                        className='w-6 h-6 text-white'
                                                         onClick={() => profileImgRef.current.click()}
                                                     />
                                                 )}
@@ -169,96 +170,97 @@ const ProfilePage = () => {
                                         </div>
                                     </div>
                                 </div>
-                                <div className='flex justify-end px-4 mt-5'>
+
+                                <div className='flex justify-end px-4 mt-5 min-h-[60px]'>
                                     {isMyProfile && <EditProfileModal authUser={authUser} />}
                                     {!isMyProfile && (
                                         <button
-                                            className='btn btn-outline rounded-full btn-sm'
+                                            className='btn btn-outline rounded-full btn-sm text-artistic-primary hover:bg-artistic-primary hover:text-white border-artistic-primary'
                                             onClick={() => follow(user?._id)}
                                         >
                                             {isFollowing && <LoadingRing />}
                                             {!isFollowing && amIFollowing && "Unfollow"}
-                                            {!isFollowing && !amIFollowing && "Follow"} 
+                                            {!isFollowing && !amIFollowing && "Follow"}
                                         </button>
                                     )}
                                     {(coverImg || profileImg) && (
                                         <button
                                             className='btn btn-primary rounded-full btn-sm text-white px-4 ml-2'
                                             onClick={() => updateProfile()}
-                                            disabled={isUpdatingProfile} // Disable button while updating
+                                            disabled={isUpdatingProfile}
                                         >
                                             {isUpdatingProfile ? "Updating" : "Update"}
-                                        </button> 
+                                        </button>
                                     )}
                                 </div>
 
-                                <div className='flex flex-col gap-4 mt-3 px-4 text-black py-4'>
+                                <div className='flex flex-col gap-4 mt-3 px-4 py-4'>
                                     <div className='flex flex-col'>
-                                        <span className='font-bold text-lg'>{ user?.fullName}</span>
-                                        <span className='text-sm text-slate-500'>@{user?.university}</span>
-                                        <span className='text-sm my-1'>{user?.bio}</span>
+                                        <span className='font-bold text-xl text-white font-heading'>{user?.fullName}</span>
+                                        <span className='text-sm text-artistic-muted'>@{user?.university}</span>
+                                        <span className='text-sm my-2 text-gray-300 leading-relaxed'>{user?.bio}</span>
                                     </div>
 
-                                    <div className='flex gap-2 flex-wrap'>
+                                    <div className='flex gap-4 flex-wrap text-artistic-muted text-sm'>
                                         {user?.link && (
-                                            <div className='flex gap-1 items-center '>
-                                                <>
-                                                    <FaLink className='w-3 h-3 text-slate-500' />
-                                                    <a
-                                                        href={user.link} // Use the actual user link
-                                                        target='_blank'
-                                                        rel='noreferrer'
-                                                        className='text-sm text-blue-500 hover:underline'
-                                                    >
-                                                        {user.link}
-                                                    </a>
-                                                </>
+                                            <div className='flex gap-1 items-center hover:text-white transition-colors'>
+                                                <FaLink className='w-3 h-3' />
+                                                <a
+                                                    href={user.link}
+                                                    target='_blank'
+                                                    rel='noreferrer'
+                                                    className='text-blue-400 hover:underline'
+                                                >
+                                                    {user.link}
+                                                </a>
                                             </div>
                                         )}
                                         <div className='flex gap-2 items-center'>
-                                            <IoCalendarOutline className='w-4 h-4 text-slate-500' />
-                                            <span className='text-sm text-slate-500'>
-                                                {memberSinceDate}
-                                            </span>
+                                            <IoCalendarOutline className='w-4 h-4' />
+                                            <span>{memberSinceDate}</span>
                                         </div>
                                     </div>
-                                    <div className='flex gap-2'>
-                                        <div className='flex gap-1 items-center'>
-                                            <span className='font-bold text-sm'>{user?.following?.length}</span>
-                                            <span className='text-slate-500 text-sm'>Following</span>
+
+                                    <div className='flex gap-4 mt-2'>
+                                        <div className='flex gap-1 items-center text-gray-300'>
+                                            <span className='font-bold text-white'>{user?.following?.length}</span>
+                                            <span className='text-artistic-muted text-sm'>Following</span>
                                         </div>
-                                        <div className='flex gap-1 items-center'>
-                                            <span className='font-bold text-sm'>{user?.followers?.length}</span>
-                                            <span className='text-slate-500 text-sm'>Followers</span>
+                                        <div className='flex gap-1 items-center text-gray-300'>
+                                            <span className='font-bold text-white'>{user?.followers?.length}</span>
+                                            <span className='text-artistic-muted text-sm'>Followers</span>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className='flex w-full border border-gray-300 rounded-full bg-white mt-4'>
+                            {/* Tabs */}
+                            <div className='flex w-full glass-panel mx-4 mt-4 mb-2 overflow-hidden rounded-2xl'>
                                 <div
-                                    className='flex justify-center text-[#153a54] flex-1 p-3 transition duration-300 relative cursor-pointer'
+                                    className={`flex justify-center flex-1 p-3 transition duration-300 relative cursor-pointer font-medium ${feedType === "posts" ? "text-white bg-artistic-primary/10" : "text-artistic-muted hover:bg-white/5"}`}
                                     onClick={() => setFeedType("posts")}
                                 >
                                     Posts
                                     {feedType === "posts" && (
-                                        <div className='absolute bottom-0 w-10 h-1 rounded-full bg-primary' />
+                                        <div className='absolute bottom-0 w-16 h-1 rounded-full bg-artistic-primary' />
                                     )}
                                 </div>
                                 <div
-                                    className='flex justify-center flex-1 p-3 text-slate-500 transition duration-300 relative cursor-pointer'
+                                    className={`flex justify-center flex-1 p-3 transition duration-300 relative cursor-pointer font-medium ${feedType === "likes" ? "text-white bg-artistic-primary/10" : "text-artistic-muted hover:bg-white/5"}`}
                                     onClick={() => setFeedType("likes")}
                                 >
                                     Likes
                                     {feedType === "likes" && (
-                                        <div className='absolute bottom-0 w-10 h-1 rounded-full bg-primary' />
+                                        <div className='absolute bottom-0 w-16 h-1 rounded-full bg-artistic-primary' />
                                     )}
                                 </div>
                             </div>
                         </>
                     )}
 
-                    <Posts feedType={feedType} username={user?.username} userId={user?._id} className="profilePost" />
+                    <div className="mx-4">
+                        <Posts feedType={feedType} username={user?.username} userId={user?._id} className="profilePost" />
+                    </div>
                 </div>
             </div>
         </>

@@ -2,7 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import React, { useState } from "react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
-import { authenticatedFetch } from "../../../utils/authenticatedFetch"; // Import the helper
+import api from "../../../utils/api";
 
 const ResetPassword = () => {
     const [otp, setOtp] = useState("");
@@ -17,17 +17,11 @@ const ResetPassword = () => {
     const { mutate: resetPasswordMutation, isPending: isResetPasswordPending, isError: isResetPasswordError, error: resetPasswordError } = useMutation({
         mutationFn: async ({ otp, newPassword, confirmNewPassword }) => {
             try {
-                // Use authenticatedFetch for the reset password API call
-                // It automatically handles Content-Type: application/json and Authorization header
-                const data = await authenticatedFetch("/api/auth/resetPassword", {
-                    method: "POST",
-                    body: JSON.stringify({ otp, newPassword, confirmNewPassword })
-                });
-                
-                return data;
+                const res = await api.post("/auth/resetPassword", { otp, newPassword, confirmNewPassword });
+                return res.data;
             } catch (err) {
                 console.error("Error during reset password mutation:", err);
-                throw err; // Re-throw for react-query to handle
+                throw err;
             }
         },
         onSuccess: () => {

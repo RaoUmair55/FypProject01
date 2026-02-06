@@ -3,30 +3,25 @@ import { useInView } from "react-intersection-observer";
 import Post from "./Post";
 import PostSkeleton from "../skeletons/PostSkeleton";
 import { useEffect } from "react";
-import { authenticatedFetch } from "../../utils/authenticatedFetch"; // Adjust the import path as needed
+import api from "../../utils/api";
 
 const Posts = ({ feedType, username, userId, category }) => {
   const { ref, inView } = useInView();
-  
-  // Define the backend URL for the API client
-  const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000';
 
   const getPostEndPoint = () => {
     switch (feedType) {
       case "forYou":
-        // When using authenticatedFetch, you pass the relative path,
-        // as the helper prepends the BACKEND_URL.
-        return "/api/posts/all"; 
+        return "/posts/all";
       case "following":
-        return "/api/posts/following";
+        return "/posts/following";
       case "posts":
-        return username ? `/api/posts/userPosts/${username}` : null;
+        return username ? `/posts/userPosts/${username}` : null;
       case "likes":
-        return userId ? `/api/posts/getlikedPost/${userId}` : null;
+        return userId ? `/posts/getlikedPost/${userId}` : null;
       case "category":
-        return category ? `/api/posts/category/${category}` : null;
+        return category ? `/posts/category/${category}` : null;
       default:
-        return "/api/posts/all";
+        return "/posts/all";
     }
   };
 
@@ -47,17 +42,11 @@ const Posts = ({ feedType, username, userId, category }) => {
         throw new Error("Invalid endpoint. Missing username or userId.");
       }
 
-      // Construct the full URL with query parameters for pagination.
-      // authenticatedFetch will prepend the base backend URL.
       const urlWithParams = `${POST_ENDPOINT}?page=${pageParam}&limit=15`;
 
       try {
-        // Use authenticatedFetch instead of direct fetch
-        // It handles the full URL construction and error checking (res.ok)
-        const result = await authenticatedFetch(urlWithParams);
-
-        // authenticatedFetch already handles !res.ok and error parsing,
-        // so you can directly return the result.
+        const res = await api.get(urlWithParams);
+        const result = res.data;
         return {
           posts: Array.isArray(result.posts) ? result.posts : [],
           nextPage: pageParam + 1,
@@ -65,10 +54,8 @@ const Posts = ({ feedType, username, userId, category }) => {
         };
 
       } catch (error) {
-        // authenticatedFetch throws an error if the response is not ok,
-        // or if authentication fails (401/403).
         console.error("Error fetching posts:", error);
-        throw error; // Re-throw the error for useInfiniteQuery to handle
+        throw error;
       }
     },
     enabled: !!POST_ENDPOINT, // Only fetch if endpoint is valid
@@ -87,8 +74,8 @@ const Posts = ({ feedType, username, userId, category }) => {
 
   const posts = Array.isArray(data?.pages)
     ? data.pages.flatMap((page) =>
-        Array.isArray(page?.posts) ? page.posts : []
-      )
+      Array.isArray(page?.posts) ? page.posts : []
+    )
     : [];
 
   return (

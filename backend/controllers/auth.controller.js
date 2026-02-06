@@ -99,8 +99,8 @@ export const resetPassword = async (req, res) => {
 
         // matching the otp
         const user = await User.findOne({ otp });            // dubious
-        if (!user){
-            return res.status(400).json({error: "Invalid or expired OTP"})
+        if (!user) {
+            return res.status(400).json({ error: "Invalid or expired OTP" })
         }
 
         if (user.otp != otp) {
@@ -116,7 +116,7 @@ export const resetPassword = async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(newPassword, salt);
         user.password = hashedPassword;
-        
+
         // remove the otp and otpExpiresAt from db
         user.otp = null;
         user.otpExpiresAt = null;
@@ -181,27 +181,24 @@ export const login = async (req, res) => {
     try {
         const { email, password } = req.body;
         if (!email || !password) {
-            if (!email) {
-                return res.status(400).json({ error: "Email is required" });
-            }
-            else {
-                return res.status(400).json({ error: "Password is required" });
-            }
+            return res.status(400).json({ error: "Email and Password are required" });
         }
+
         const user = await User.findOne({ email });
         if (!user) {
-            return res.status(400).json({ error: "User not found" });
+            return res.status(400).json({ error: "Invalid credentials" }); // Generic error for security
         }
 
         if (!user.isVerified) {
             return res.status(400).json({ error: "User not verified. Please check your email for the OTP." });
         }
-        const isPasswordMatch = await bcrypt.compare(password, user?.password || "");
+
+        const isPasswordMatch = await bcrypt.compare(password, user.password || "");
         if (!isPasswordMatch) {
             return res.status(400).json({ error: "Invalid credentials" });
         }
-        // generateTokenAndSetCookie(user._id, res)
-        const token = generateToken(user._id);
+
+        const token = generateTokenAndSetCookie(user._id, res);
 
         res.status(200).json({
             _id: user._id,
@@ -209,18 +206,18 @@ export const login = async (req, res) => {
             fullName: user.fullName,
             email: user.email,
             university: user.university,
-            createdAt: user.createdAt,
-            updatedAt: user.updatedAt,
+            profileImg: user.profileImg,
+            coverImg: user.coverImg,
             followers: user.followers,
             following: user.following,
-            token: token,
-
+            token: token, // Returning for backward compatibility, but Cookie is primary
         });
     } catch (error) {
         console.error("Error in login:", error);
         res.status(500).json({ error: "Internal server error" });
     }
 }
+
 
 
 

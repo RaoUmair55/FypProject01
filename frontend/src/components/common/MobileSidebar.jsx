@@ -1,56 +1,48 @@
 import { MdHomeFilled } from "react-icons/md";
 import { IoNotifications } from "react-icons/io5";
-import { FaUser } from "react-icons/fa";
+import { FaUser, FaTag, FaCalendarAlt, FaBook } from "react-icons/fa";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { BiLogOut } from "react-icons/bi";
 import toast from "react-hot-toast";
-import { authenticatedFetch } from "../../utils/authenticatedFetch"; // Import the helper
+import useAuthUser from "../../hooks/useAuthUser";
+import api from "../../utils/api";
 
 const MobileSidebar = () => {
     const queryClient = useQueryClient();
     const navigate = useNavigate();
 
-    const { data } = useQuery({ queryKey: ["authUser"] });
+    const { data } = useAuthUser();
     const { data: notificationCountData } = useQuery({
         queryKey: ["notificationCount"],
         queryFn: async () => {
             try {
-                // Use authenticatedFetch for notifications count
-                const data = await authenticatedFetch("/api/notifications/number");
-                return data;
+                const res = await api.get("/notifications/number");
+                return res.data;
             } catch (error) {
                 console.error("Error fetching notification count:", error);
-                throw error; // Re-throw for react-query to handle
+                throw error;
             }
         },
         refetchInterval: 10000,
-        // Only enable this query if an authUser exists
-        enabled: !!data, 
+        enabled: !!data,
     });
     const notificationCount = notificationCountData?.number || 0;
 
     // Logout mutation
     const { mutate: logoutMutation } = useMutation({
         mutationFn: async () => {
-           try {
-                // Use authenticatedFetch for logout
-                // authenticatedFetch handles the response.ok check and error parsing
-                const res = await authenticatedFetch("/api/auth/logout", {
-                    method: "POST",
-                });
-                return res; // Assuming res is just a success indicator
+            try {
+                const res = await api.post("/auth/logout");
+                return res.data;
             } catch (err) {
                 console.error("Error during logout mutation:", err);
-                throw err; // Re-throw for react-query to handle
+                throw err;
             }
         },
         onSuccess: () => {
-            // Clear the token from localStorage on successful logout
-            localStorage.removeItem("jwt_token");
             queryClient.invalidateQueries({ queryKey: ["authUser"] });
             toast.success("Logout successful");
-            // No explicit navigate here, App.jsx handles redirect based on authUser
         },
         onError: (error) => {
             toast.error(error.message || "Couldn't logout");
@@ -62,8 +54,7 @@ const MobileSidebar = () => {
             <NavLink
                 to="/"
                 className={({ isActive }) =>
-                    `flex flex-col items-center px-3 py-1 rounded-xl ${
-                        isActive ? "bg-[#dff2fe] text-[#153a54]" : "text-[#153a54]"
+                    `flex flex-col items-center px-3 py-1 rounded-xl ${isActive ? "bg-[#dff2fe] text-[#153a54]" : "text-[#153a54]"
                     }`
                 }
             >
@@ -73,8 +64,7 @@ const MobileSidebar = () => {
             <NavLink
                 to="/notifications"
                 className={({ isActive }) =>
-                    `flex flex-col items-center px-3 py-1 rounded-xl relative ${
-                        isActive ? "bg-[#dff2fe] text-[#153a54]" : "text-[#153a54]"
+                    `flex flex-col items-center px-3 py-1 rounded-xl relative ${isActive ? "bg-[#dff2fe] text-[#153a54]" : "text-[#153a54]"
                     }`
                 }
             >
@@ -89,13 +79,42 @@ const MobileSidebar = () => {
             <NavLink
                 to={data?._id ? `/profile/${data._id}` : "#"}
                 className={({ isActive }) =>
-                    `flex flex-col items-center px-3 py-1 rounded-xl ${
-                        isActive ? "bg-[#dff2fe] text-[#153a54]" : "text-[#153a54]"
+                    `flex flex-col items-center px-3 py-1 rounded-xl ${isActive ? "bg-[#dff2fe] text-[#153a54]" : "text-[#153a54]"
                     }`
                 }
             >
                 <FaUser className="w-6 h-6" />
                 <span className="text-xs">Profile</span>
+            </NavLink>
+            <NavLink
+                to="/marketplace"
+                className={({ isActive }) =>
+                    `flex flex-col items-center px-3 py-1 rounded-xl ${isActive ? "bg-[#dff2fe] text-[#153a54]" : "text-[#153a54]"
+                    }`
+                }
+            >
+                <FaTag className="w-6 h-6" />
+                <span className="text-xs">Market</span>
+            </NavLink>
+            <NavLink
+                to="/events"
+                className={({ isActive }) =>
+                    `flex flex-col items-center px-3 py-1 rounded-xl ${isActive ? "bg-[#dff2fe] text-[#153a54]" : "text-[#153a54]"
+                    }`
+                }
+            >
+                <FaCalendarAlt className="w-6 h-6" />
+                <span className="text-xs">Events</span>
+            </NavLink>
+            <NavLink
+                to="/resources"
+                className={({ isActive }) =>
+                    `flex flex-col items-center px-3 py-1 rounded-xl ${isActive ? "bg-[#dff2fe] text-[#153a54]" : "text-[#153a54]"
+                    }`
+                }
+            >
+                <FaBook className="w-6 h-6" />
+                <span className="text-xs">Notes</span>
             </NavLink>
             <button
                 onClick={() => logoutMutation()}

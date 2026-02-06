@@ -6,22 +6,25 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-hot-toast";
 import { useEffect } from "react";
 import EmojiPicker from "emoji-picker-react";
-import { authenticatedFetch } from "../../utils/authenticatedFetch"; // Import the helper
+
+
+import api from "../../utils/api";
+import useAuthUser from "../../hooks/useAuthUser";
 
 const CreatePost = () => {
-    const textareaRef = useRef(null);
-    const categoryRef = useRef(null);
+    const { data: authUser } = useAuthUser();
+    const queryClient = useQueryClient();
+
     const [text, setText] = useState("");
     const [img, setImg] = useState(null);
     const [category, setCategory] = useState("Department");
     const [isAnonymous, setIsAnonymous] = useState(false);
-    const imgRef = useRef(null);
-    const { data: authUser } = useQuery({ queryKey: ["authUser"] });
-    const queryClient = useQueryClient();
-    const emojiRef = useRef(null);
-
     const [showPicker, setShowPicker] = useState(false);
 
+    const imgRef = useRef(null);
+    const textareaRef = useRef(null);
+    const categoryRef = useRef(null);
+    const emojiRef = useRef(null);
     const {
         mutate: createPost,
         isPending,
@@ -33,39 +36,20 @@ const CreatePost = () => {
                 const formData = new FormData();
                 formData.append("text", text);
                 formData.append("category", category);
-                if(img) {
-                    formData.append("image", img);
+                if (img) {
+                    formData.append("image", img); // Make sure backend expects 'image'
                 }
                 formData.append("isAnonymous", isAnonymous.toString());
 
-                const token = localStorage.getItem("jwt_token");
-
-                const result = await fetch("https://fypproject01.onrender.com/api/posts/create", {
-                    method: "POST",
+                const res = await api.post("/posts/create", formData, {
                     headers: {
-                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "multipart/form-data",
                     },
-                    credentials: "include",
-                    body: formData,
                 });
-
-                let data;
-                try {
-                    data = await result.json();
-                } catch (error) {
-                    console.error("Error parsing response JSON:", error);
-                    throw new Error("Failed to parse server response");
-                }
-
-                if (!result.ok) {
-                    console.error("Error response from server:", data);
-                    throw new Error(data.message || data.error || "Failed to create post");
-                }
-
-                return data; // ✅ Moved this inside the try block
+                return res.data;
             } catch (error) {
                 console.error("Error in createPost mutation:", error);
-                throw new Error(error.message || "Failed to create post");
+                throw error;
             }
         },
         onSuccess: (data) => {
@@ -73,10 +57,9 @@ const CreatePost = () => {
             setText("");
             setImg(null);
             toast.success("Post created successfully!");
-            imgRef.current.value = null; // Clear the file input
+            if (imgRef.current) imgRef.current.value = null;
 
             queryClient.invalidateQueries({ queryKey: ["posts"] });
-
         }
     });
 
@@ -161,28 +144,30 @@ const CreatePost = () => {
     };
 
     return (
-        <div className="flex p-4 items-start gap-4 border-2 rounded-2xl my-4 border-gray-300 bg-[#fff]">
+        <div className="flex p-4 items-start gap-4 rounded-2xl my-4 glass-panel">
             <div className="avatar">
-                <div className="w-8 rounded-full">
+                <div className="w-10 rounded-full border border-gray-600">
                     <img src={profileImg} alt="User Profile" />
                 </div>
             </div>
             <form className="flex flex-col gap-3 w-full" onSubmit={handleSubmit}>
                 <textarea
-                    className="textarea bg-[#ecf1fc] rounded-2xl w-full p-3 text-lg text-black resize-none focus:outline-none border-gray-400"
+                    className="textarea w-full p-3 text-lg text-white resize-none focus:outline-none bg-transparent border-none placeholder-gray-500"
                     placeholder="What is happening?!"
                     value={text}
                     ref={textareaRef}
                     onClick={addAnimation}
                     onChange={(e) => setText(e.target.value)}
                 />
-                <div ref={categoryRef} role="alert" className="alert bg-transparent text-gray-600 border-gray-300 flex flex-col gap-2 items-start hidden">
-                    <div className=" flex justify-start gap-2">
+
+                {/* Category Selection */}
+                <div ref={categoryRef} role="alert" className="alert bg-transparent border-none p-0 flex flex-col gap-2 items-start hidden">
+                    <div className="flex justify-start gap-2 text-artistic-primary items-center">
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
                             fill="none"
                             viewBox="0 0 24 24"
-                            className="stroke-info h-6 w-6 shrink-0"
+                            className="stroke-current h-5 w-5 shrink-0"
                         >
                             <path
                                 strokeLinecap="round"
@@ -191,50 +176,45 @@ const CreatePost = () => {
                                 d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                             ></path>
                         </svg>
-                        <span>Select Category for your post</span>
+                        <span className="text-sm">Select Category</span>
                     </div>
 
-                    <div
-                        className="customAnimation tabs tabs-box flex justify-evenly bg-[#ffffff] text-black ">
-                        <input
-                            type="radio"
-                            name="category"
-                            className="tab [--tab-bg:#ecf1fc] checked:text-black text-black"
-                            aria-label="Department"
-                            defaultChecked
-                            onChange={() => setCategory("Department")} // Added onChange for defaultChecked
-                        />
-                        <input
-                            type="radio"
-                            name="category"
-                            className="tab [--tab-bg:#ecf1fc] checked:text-black text-black"
-                            aria-label="Announcement"
-                            onChange={() => setCategory("Announcement")}
-                        />
-                        <input
-                            type="radio"
-                            name="category"
-                            className="tab [--tab-bg:#ecf1fc] checked:text-black"
-                            aria-label="Events"
-                            onChange={() => setCategory("Events")}
-                        />
-                        <input
-                            type="radio"
-                            name="category"
-                            className="tab [--tab-bg:#ecf1fc] checked:text-black"
-                            aria-label="Other"
-                            onChange={() => setCategory("Other")}
-                        />
+                    <div className="flex flex-wrap gap-2 text-white">
+                        {["Department", "Announcement", "Events", "Other"].map((cat) => (
+                            <label
+                                key={cat}
+                                className={`cursor-pointer px-3 py-1 rounded-full text-xs font-medium border transition-colors ${category === cat
+                                    ? "bg-artistic-primary border-artistic-primary text-white"
+                                    : "border-gray-600 text-gray-400 hover:bg-white/5"
+                                    }`}
+                            >
+                                <input
+                                    type="radio"
+                                    name="category"
+                                    className="hidden"
+                                    onChange={() => setCategory(cat)}
+                                    checked={category === cat}
+                                />
+                                {cat}
+                            </label>
+                        ))}
                     </div>
-                    <span className="text-gray-500 flex gap-3 items-center">Post anonymously
-                        <input type="checkbox" checked={isAnonymous} className="toggle bg-black checked:bg-[#1a8cd8] " onChange={() => setIsAnonymous(!isAnonymous)} />
-                    </span>
+
+                    <label className="label cursor-pointer justify-start gap-2 mt-2">
+                        <span className="label-text text-gray-400 text-sm">Post anonymously</span>
+                        <input
+                            type="checkbox"
+                            checked={isAnonymous}
+                            className="toggle toggle-primary toggle-sm"
+                            onChange={() => setIsAnonymous(!isAnonymous)}
+                        />
+                    </label>
                 </div>
 
                 {img && (
-                    <div className="relative w-72 mx-auto">
+                    <div className="relative w-full mx-auto mt-2">
                         <IoCloseSharp
-                            className="absolute top-0 right-0 text-white bg-gray-800 rounded-full w-5 h-5 cursor-pointer"
+                            className="absolute top-2 right-2 text-white bg-black/50 hover:bg-black/70 rounded-full w-6 h-6 p-1 cursor-pointer transition-colors backdrop-blur-sm"
                             onClick={() => {
                                 setImg(null);
                                 imgRef.current.value = null;
@@ -242,31 +222,31 @@ const CreatePost = () => {
                         />
                         <img
                             src={URL.createObjectURL(img)}
-                            className="w-full mx-auto h-72 object-contain rounded"
+                            className="w-full max-h-[400px] object-cover rounded-xl border border-gray-700"
                             alt="Selected Image"
                         />
                     </div>
                 )}
 
-                <div className="flex justify-between border-t py-2 border-[#dce1e7]">
-                    <div className="flex gap-1 items-center">
+                <div className="flex justify-between border-t border-gray-700/50 pt-3 mt-2">
+                    <div className="flex gap-4 items-center">
                         <CiImageOn
-                            className="fill-[#153a54] w-6 h-6 cursor-pointer"
+                            className="text-artistic-primary w-6 h-6 cursor-pointer hover:text-white transition-colors"
                             onClick={() => imgRef.current.click()}
                         />
                         <div className="relative">
                             <BsEmojiSmileFill
-                                className="fill-[#153a54] w-5 h-5 cursor-pointer emoji-trigger"
+                                className="text-artistic-primary w-5 h-5 cursor-pointer hover:text-white transition-colors emoji-trigger"
                                 onClick={() => setShowPicker(val => !val)}
                             />
                             {showPicker && (
                                 <div ref={emojiRef} className="absolute top-full mt-2 z-50">
-                                    <EmojiPicker onEmojiClick={onEmojiClick} />
+                                    <EmojiPicker theme="dark" onEmojiClick={onEmojiClick} />
                                 </div>
                             )}
                         </div>
                     </div>
-                    <div className=" flex gap-2 items-center">
+                    <div>
                         <input
                             type="file"
                             accept="image/*"
@@ -275,12 +255,15 @@ const CreatePost = () => {
                             onChange={handleImgChange}
                         />
 
-                        <button className="btn bg-[#1d9bf0] text-white rounded-full btn-sm hover:bg-[#1a8cd8] px-4" disabled={isPending}>
+                        <button
+                            className="btn btn-primary rounded-full btn-sm text-white px-6"
+                            disabled={isPending}
+                        >
                             {isPending ? "Buzzing..." : "Buzzz"}
                         </button>
                     </div>
                 </div>
-                {isError && <div className="text-red-500">{error.message}</div>}
+                {isError && <div className="text-error text-sm mt-2">{error.message}</div>}
             </form>
         </div>
     );

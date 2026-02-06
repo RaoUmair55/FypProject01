@@ -2,27 +2,18 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
+import api from "../../../utils/api";
+
 const VerifyOTPPage = () => {
     const [otp, setOtp] = useState("");
     const location = useLocation();
     const navigate = useNavigate();
     const email = location.state?.email;
 
-    // Define the backend URL using the environment variable
-    const BACKEND_URL = "https://fypproject01.onrender.com";
-
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            // Use the full backend URL for the verify-otp API call
-            const res = await fetch(`${BACKEND_URL}/api/auth/verify-otp`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email, otp }),
-            });
-
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error || "OTP verification failed");
+            const { data } = await api.post("/auth/verify-otp", { email, otp });
             toast.success("Email verified! You can now login.");
             navigate("/login");
         } catch (error) {

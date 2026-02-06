@@ -1,12 +1,14 @@
 import React, { lazy, Suspense, useEffect } from 'react';
 import './index.css';
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { SocketContextProvider } from './context/SocketContext';
 
 import Sidebar from "./components/common/Sidebar";
 import MobileSidebar from "./components/common/MobileSidebar";
 import RightPanel from './components/common/RightPanel';
 import { Toaster } from 'react-hot-toast';
 import { useQuery } from '@tanstack/react-query';
+import useAuthUser from './hooks/useAuthUser';
 import LoadingSpinner from './components/common/LoadingSpinner';
 import CoolLoader from './utils/loader';
 import ForgetPassword from './Pages/auth/forgetPassword/ForgetPassword';
@@ -19,40 +21,20 @@ const SignupPage = lazy(() => import('./Pages/auth/signup/SignUpPage'));
 const NotificationPage = lazy(() => import('./Pages/notification/NotificationPage'));
 const ProfilePage = lazy(() => import('./Pages/profile/ProfilePage'));
 const VerifyOTPPage = lazy(() => import('./Pages/auth/signup/VerifyEmail'));
+const DashboardPage = lazy(() => import('./Pages/admin/DashboardPage'));
+const StudentManagement = lazy(() => import('./Pages/admin/StudentManagement'));
+const UniversityPosts = lazy(() => import('./Pages/admin/UniversityPosts'));
+const AdminManagement = lazy(() => import('./Pages/admin/AdminManagement'));
+const MarketplacePage = lazy(() => import('./Pages/marketplace/MarketplacePage'));
+const EventsPage = lazy(() => import('./Pages/events/EventsPage'));
+const StudyResourcesPage = lazy(() => import('./Pages/resources/StudyResourcesPage'));
+
+
+import api from './utils/api';
 
 function App() {
-  const { data: authUser, isLoading, isError, error } = useQuery({
-    queryKey: ['authUser'],
-    queryFn: async () => {
-      try {
-        const token = localStorage.getItem("jwt_token"); // Get token from localStorage
-
-        if (!token) return null; // No token, no authenticated user
-
-        const res = await fetch(`https://fypproject01.onrender.com/api/auth/getMe`, {
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}` // Send token in Authorization header
-          },
-        });
-        const data = await res.json();
-        if (data.error) {
-          localStorage.removeItem("jwt_token"); // Remove token if there's an error
-          return null;
-        }
-        if (!res.ok) {
-           localStorage.removeItem("jwt_token"); // Clear token on network error
-          throw new Error(data.error || "Something went wrong");
-        }
-        return data;
-      } catch (error) {
-                        localStorage.removeItem("jwt_token"); // Ensure token is cleared on any error
-
-        throw new Error(error);
-      }
-    },
-    retry: false
-  });
+  const { data: authUser, isLoading } = useAuthUser();
+  const location = useLocation();
 
   if (isLoading) {
     return (
@@ -63,34 +45,43 @@ function App() {
   }
 
   return (
-    <div className='flex max-w-7xl mx-auto gap-2 px-3 md:p-4 md:gap-10 pt-3'>
+    <SocketContextProvider>
+      <div className='flex max-w-7xl mx-auto md:p-4 gap-4 md:gap-6 pt-3 min-h-screen'>
 
-      {/* Desktop Sidebar */}
-      {authUser && (
-        <div className="hidden md:block">
-          <Sidebar />
-        </div>
-      )}
+        {/* Desktop Sidebar */}
+        {authUser && (
+          <div className="hidden md:block w-72 shrink-0">
+            <Sidebar />
+          </div>
+        )}
 
-      <Suspense fallback={<div className='flex justify-center items-center w-full h-screen'><CoolLoader height={200} /></div>}>
-        <Routes>
-          <Route path="/" element={authUser ? <HomePage /> : <Navigate to="/login" />} />
-          <Route path="/login" element={!authUser ? <LoginPage /> : <Navigate to="/" />} />
-          <Route path="/signup" element={!authUser ? <SignupPage /> : <Navigate to="/" />} />
-          <Route path="/verify" element={!authUser ? <VerifyOTPPage /> : <Navigate to="/" />} />
-          <Route path="/notifications" element={authUser ? <NotificationPage /> : <Navigate to="/login" />} />
-          <Route path="/profile/:id" element={authUser ? <ProfilePage /> : <Navigate to="/login" />} />
-          <Route path='/resetPassword' element={<ResetPassword />} />
-        </Routes>
-      </Suspense>
+        <Suspense fallback={<div className='flex justify-center items-center w-full h-screen'><CoolLoader height={200} /></div>}>
+          <Routes>
+            <Route path="/" element={authUser ? <HomePage /> : <Navigate to="/login" />} />
+            <Route path="/login" element={!authUser ? <LoginPage /> : <Navigate to="/" />} />
+            <Route path="/signup" element={!authUser ? <SignupPage /> : <Navigate to="/" />} />
+            <Route path="/verify" element={!authUser ? <VerifyOTPPage /> : <Navigate to="/" />} />
+            <Route path="/notifications" element={authUser ? <NotificationPage /> : <Navigate to="/login" />} />
+            <Route path="/profile/:id" element={authUser ? <ProfilePage /> : <Navigate to="/login" />} />
+            <Route path='/resetPassword' element={<ResetPassword />} />
+            <Route path="/admin/dashboard" element={authUser && (authUser.role === 'admin' || authUser.role === 'superadmin') ? <DashboardPage /> : <Navigate to="/" />} />
+            <Route path="/admin/students" element={authUser && (authUser.role === 'admin' || authUser.role === 'superadmin') ? <StudentManagement /> : <Navigate to="/" />} />
+            <Route path="/admin/posts" element={authUser && (authUser.role === 'admin' || authUser.role === 'superadmin') ? <UniversityPosts /> : <Navigate to="/" />} />
+            <Route path="/admin/create-user" element={authUser && authUser.role === 'superadmin' ? <AdminManagement /> : <Navigate to="/" />} />
+            <Route path="/marketplace" element={authUser ? <MarketplacePage /> : <Navigate to="/login" />} />
+            <Route path="/events" element={authUser ? <EventsPage /> : <Navigate to="/login" />} />
+            <Route path="/resources" element={authUser ? <StudyResourcesPage /> : <Navigate to="/login" />} />
+          </Routes>
+        </Suspense>
 
-      {authUser && <RightPanel />}
+        {authUser && !location.pathname.startsWith('/admin') && <RightPanel />}
 
-      {/* Mobile Sidebar (Bottom Nav) */}
-      {authUser && <MobileSidebar />}
+        {/* Mobile Sidebar (Bottom Nav) */}
+        {authUser && <MobileSidebar />}
 
-      <Toaster />
-    </div>
+        <Toaster />
+      </div>
+    </SocketContextProvider>
   );
 }
 

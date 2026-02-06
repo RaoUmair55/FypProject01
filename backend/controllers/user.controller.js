@@ -1,43 +1,44 @@
 import User from "../models/user.model.js";
 import Notification from "../models/notification.model.js";
 import bcrypt from "bcryptjs";
-import  {getUniversityFromEmail}  from "../utills/universityUtills.js";
+import { getUniversityFromEmail } from "../utills/universityUtills.js";
+import { getReceiverSocketId, io } from "../socket/socket.js";
 
 
 export const getUserProfile = async (req, res) => {
-  const { id } = req.params;
+    const { id } = req.params;
 
-  if(!id) {
-    return res.status(400).json({ message: "User ID is required" });
-  }
-  try {
-    const user = await User.findById(id).select("-password -__v");
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
+    if (!id) {
+        return res.status(400).json({ message: "User ID is required" });
     }
-    res.status(200).json(user);
-  } catch (error) {
-    console.error("Error fetching user profile:", error);
-    res.status(500).json({ message: "Server error" });
-  } 
+    try {
+        const user = await User.findById(id).select("-password -__v");
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+        res.status(200).json(user);
+    } catch (error) {
+        console.error("Error fetching user profile:", error);
+        res.status(500).json({ message: "Server error" });
+    }
 }
 
 export const followUnfollowUser = async (req, res) => {
     const { id } = req.params;
     // const { userId } = req.body; // Assuming you're sending the userId in the request body
-    
+
     try {
         const userToModify = await User.findById(id);
         if (!userToModify) {
-        return res.status(404).json({ message: "User not found" });
+            return res.status(404).json({ message: "User not found" });
         }
         const currentUser = await User.findById(req.user._id); // Assuming req.user contains the authenticated user's info
-        if(id === req.user._id.toString()) {
+        if (id === req.user._id.toString()) {
             // Check if the user is trying to follow/unfollow themselves
             return res.status(400).json({ error: "You cannot follow/unfollow yourself" });
         }
 
-        if(!userToModify || !currentUser) {
+        if (!userToModify || !currentUser) {
             return res.status(404).json({ message: "User not found" });
         }
         // Check if the user is already followed
@@ -55,9 +56,9 @@ export const followUnfollowUser = async (req, res) => {
             });
             await newNotification.save();
             // Optionally, you can send a notification to the user who was unfollowed
-            
+
             res.status(200).json({ message: "Unfollowed successfully" });
-         
+
         } else {
             // Follow the user
             await User.findByIdAndUpdate(id, { $push: { followers: req.user._id } }, { new: true });
@@ -69,6 +70,12 @@ export const followUnfollowUser = async (req, res) => {
                 type: "follow",
             });
             await newNotification.save();
+
+            const receiverSocketId = getReceiverSocketId(userToModify._id);
+            if (receiverSocketId) {
+                io.to(receiverSocketId).emit("newNotification", newNotification);
+            }
+
             res.status(200).json({ message: "Followed successfully" });
         }
 
@@ -82,19 +89,20 @@ export const getSuggestedUsers = async (req, res) => {
     try {
         const userId = req.user._id; // Assuming you have the user ID from the request
         const usersFollowedByMe = await User.findById(userId).select("following");
-      const users = await User.aggregate([
-        { $match: {
-            _id:{$ne: userId},
+        const users = await User.aggregate([
+            {
+                $match: {
+                    _id: { $ne: userId },
 
-        } 
-        },
-        {$sample: { size: 10 }}, // Randomly sample 10 users
-      ])
+                }
+            },
+            { $sample: { size: 10 } }, // Randomly sample 10 users
+        ])
 
-      const filterUsers = users.filter(user => !usersFollowedByMe.following.includes(user._id.toString()))
-      const suggestedUsers = filterUsers.slice(0, 5); // Limit to 10 users
-      
-      suggestedUsers.forEach(user => user.password=null); // Remove password field from each user object
+        const filterUsers = users.filter(user => !usersFollowedByMe.following.includes(user._id.toString()))
+        const suggestedUsers = filterUsers.slice(0, 5); // Limit to 10 users
+
+        suggestedUsers.forEach(user => user.password = null); // Remove password field from each user object
 
         res.status(200).json(suggestedUsers);
     } catch (error) {
@@ -104,7 +112,7 @@ export const getSuggestedUsers = async (req, res) => {
 }
 
 export const updateUserProfile = async (req, res) => {
-    const {fullName, bio, email, username, currentPassword, newPassword} = req.body;
+    const { fullName, bio, email, username, currentPassword, newPassword } = req.body;
 
     const userId = req.user._id; // Assuming you have the user ID from the request
     try {
@@ -113,28 +121,28 @@ export const updateUserProfile = async (req, res) => {
             return res.status(404).json({ message: "User not found" });
         }
 
-       if (currentPassword || newPassword) {
+        if (currentPassword || newPassword) {
 
-         if(!newPassword && !currentPassword) {
-             return res.status(400).json({ message: "Please provide current and new password" });
-         }
-         // Check if the current password is correct
-         if (currentPassword && newPassword) {
-             const isMatch = await bcrypt.compare(currentPassword, user.password);
-             if (!isMatch) {
-                 return res.status(400).json({ message: "Current password is incorrect" });
-             }
-             if (newPassword.length < 6) {
-                 return res.status(400).json({ message: "New password must be at least 6 characters long" });
-             }
-             // Hash the new password before saving
-             const salt = await bcrypt.genSalt(10);
-             const hashedPassword = await bcrypt.hash(newPassword, salt);
-             user.password = hashedPassword; // Update the password
-         }
-       }
+            if (!newPassword && !currentPassword) {
+                return res.status(400).json({ message: "Please provide current and new password" });
+            }
+            // Check if the current password is correct
+            if (currentPassword && newPassword) {
+                const isMatch = await bcrypt.compare(currentPassword, user.password);
+                if (!isMatch) {
+                    return res.status(400).json({ message: "Current password is incorrect" });
+                }
+                if (newPassword.length < 6) {
+                    return res.status(400).json({ message: "New password must be at least 6 characters long" });
+                }
+                // Hash the new password before saving
+                const salt = await bcrypt.genSalt(10);
+                const hashedPassword = await bcrypt.hash(newPassword, salt);
+                user.password = hashedPassword; // Update the password
+            }
+        }
 
-        if(email) {
+        if (email) {
             const university = getUniversityFromEmail(email);
             if (!university) {
                 return res.status(400).json({ message: "Email does not belong to a recognized university" });
@@ -148,7 +156,7 @@ export const updateUserProfile = async (req, res) => {
         if (email) { // Check if email is provided
             user.university = getUniversityFromEmail(email); // Update university if email is provided
         }
-        
+
         await user.save();
 
 
@@ -156,7 +164,7 @@ export const updateUserProfile = async (req, res) => {
     } catch (error) {
         console.error("Error updating user profile:", error);
         res.status(500).json({ message: "Server error" });
-    } 
+    }
 }
 
 export const getFollowers = async (req, res) => {

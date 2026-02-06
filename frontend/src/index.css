@@ -1,61 +1,87 @@
 @import "tailwindcss";
 @plugin "daisyui";
-/* @tailwind utilities; */
 
-
-.card{
-  @apply hover:shadow-[#153a54] shadow-lg;
-  @apply hover:scale-105;
-  @apply transition-all;
-  @apply duration-300;
-  @apply ease-in-out;
-  @apply hover:shadow-lg;
-  @apply hover:shadow-[#153a54];
-  @apply hover:shadow-2xl;
-  @apply hover:shadow-[#153a54];
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
 }
 
-
-
-input::placeholder{
-  color: #f8f9fd;
+::-webkit-scrollbar-track {
+  background: #0F1115;
 }
 
-.tab{
-  color: black;
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 4px;
 }
 
-textarea::placeholder {
-  color: black;
+::-webkit-scrollbar-thumb:hover {
+  background: #475569;
 }
 
-textarea{
-  color: #0d0d0e;
-  font-size: .9rem;
-
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: #000000;
+  background-image: linear-gradient(#1A1A1A 1px, transparent 1px),
+    linear-gradient(to right, #1A1A1A 1px, transparent 1px);
+  background-size: 30px 30px;
+  color: #e7e9ea;
 }
 
-.height-self{
-  height:96dvh;
+/* ... headers remain ... */
+
+/* Solid Panel (formerly glass-panel) */
+.glass-panel {
+  background-color: #16181C;
+  /* Lighter than background */
+  border: 1px solid #2F3336;
 }
 
+.input-artistic {
+  background-color: #1E2128;
+  border: 1px solid #374151;
+  color: white;
+  border-radius: 0.75rem;
+  transition: all 0.2s;
+  padding: 0.5rem 1rem;
+}
 
-@media only screen and (min-width: 300px) and (max-width: 600px) {
-  *{
-    font-size: 0.8rem;
+.input-artistic:focus {
+  border-color: #7c3aed;
+  outline: none;
+  box-shadow: 0 0 0 1px #7c3aed;
+}
+
+/* Animations */
+@keyframes float {
+  0% {
+    transform: translateY(0px);
   }
-  .post-card {
-    /* width: 70vw; */
-    /* font-size: .8rem; */
-   
+
+  50% {
+    transform: translateY(-5px);
   }
 
-  /* .sidebar{
-    display: none;
-  } */
+  100% {
+    transform: translateY(0px);
+  }
+}
 
-  .app{
-    
+.animate-float {
+  animation: float 4s ease-in-out infinite;
+}
+
+.height-self {
+  height: 96vh;
+}
+
+
+@media only screen and (max-width: 600px) {
+  /* Removed blanket * font-size rule as it breaks accessibility and layout */
+  /* Use specific utility classes for mobile adjustments */
+
+  .app {
+    /* Mobile specific app styles if needed */
   }
 
 }

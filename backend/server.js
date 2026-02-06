@@ -1,39 +1,51 @@
 import express from 'express';
 import cors from 'cors';
-import  authRoutes from './routes/auth.routes.js';
-import UserRoutes from './routes/user.routes.js';
+import cookieParser from 'cookie-parser';
+import path from 'path';
+
+// Config & DB
+import { PORT, FRONTEND_URL } from './config/env.js';
+import connectMongoDB from './db/connectMongoDB.js';
+
+// Routes
+import authRoutes from './routes/auth.routes.js';
+import userRoutes from './routes/user.routes.js';
 import postRoutes from './routes/post.routes.js';
 import notificationRoutes from './routes/notification.routes.js';
-import dotenv from 'dotenv';
-import connectMongoDB from './db/connectMongoDB.js';
-import cookieParser from 'cookie-parser';
+import adminRoutes from './routes/admin.routes.js';
+import productRoutes from './routes/product.routes.js';
+import eventRoutes from './routes/event.routes.js';
+import resourceRoutes from './routes/resource.routes.js';
 
+import { app, server } from "./socket/socket.js";
 
-dotenv.config();
-const app = express();
-const PORT = process.env.PORT || 5000;
+const __dirname = path.resolve();
 
-
-
+// Middleware
 app.use(cors({
-  origin:"https://campusbuzzz.com",
-  credentials: true, // Allow cookies to be sent with requests
+  origin: [FRONTEND_URL, "http://localhost:5173", "http://localhost:3000", "https://campusbuzzz.com"], // Allow env var + local dev + production
+  credentials: true,
 }));
 
-app.use(express.urlencoded({ extended: true }));
-app.use(express.static("public")) //pdf picture etc for public anyone can accept
-
+app.use(express.json({ limit: "5mb" })); // Added JSON parsing with limit
+app.use(express.urlencoded({ extended: true })); // Parse form data
 app.use(cookieParser());
 
-
+// Routes
 app.use("/api/auth", authRoutes);
-app.use("/api/user", UserRoutes);
+app.use("/api/user", userRoutes);
 app.use("/api/posts", postRoutes);
 app.use("/api/notifications", notificationRoutes);
-// console.log(process.env.PORT)
+app.use("/api/admin", adminRoutes);
+app.use("/api/products", productRoutes);
+app.use("/api/events", eventRoutes);
+app.use("/api/resources", resourceRoutes);
 
+// Static assets (if any)
+app.use(express.static(path.join(__dirname, "public")));
 
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+// Start Server
+server.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
   connectMongoDB();
 });

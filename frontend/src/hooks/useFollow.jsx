@@ -1,24 +1,18 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-import { authenticatedFetch } from "../utils/authenticatedFetch"; // Import the helper
+import api from "../utils/api";
 
 const useFollow = () => {
     const queryClient = useQueryClient();
 
-    const { mutate: follow, isPending, isError, error } = useMutation({ // Added isError and error for better handling
+    const { mutate: follow, isPending, isError, error } = useMutation({
         mutationFn: async (userId) => {
             try {
-                // Use authenticatedFetch for the follow/unfollow API call
-                // It automatically handles the Authorization header and error parsing.
-                const data = await authenticatedFetch(`/api/user/follow/${userId}`, {
-                    method: 'POST',
-                    // No need to set Content-Type: application/json or Authorization header here,
-                    // as authenticatedFetch handles it.
-                });
-                return data;
+                const res = await api.post(`/user/follow/${userId}`);
+                return res.data;
             } catch (error) {
                 console.error("Error in useFollow mutation:", error);
-                throw error; // Re-throw for react-query to handle
+                throw error;
             }
         },
         onSuccess: () => {
